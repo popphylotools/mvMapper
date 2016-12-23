@@ -22,7 +22,6 @@ def get_data():
     data.easting = data.easting.apply(lambda x: 0 if pd.isnull(x) else x)
 
     data = data.applymap(lambda x: "NaN" if pd.isnull(x) else x)
-    data = data.applymap(lambda x: "NaN" if pd.isnull(x) else x)
 
     return data
 
@@ -33,7 +32,7 @@ def create_source():
         groups = pd.cut(df[size.value].values, len(SIZES))
         df["size"] = [SIZES[xx] for xx in groups.codes]
 
-        df["color"] = "#31AADE"
+    df["color"] = "#31AADE"
     if color.value != 'None' and color.value in quantileable:
         colors = plasma(default_color_count)
         groups = pd.cut(df[color.value].values, len(colors))
@@ -41,7 +40,7 @@ def create_source():
     elif color.value != 'None' and color.value in discrete_colorable:
         values = df[color.value][pd.notnull(df[color.value])].unique()
         colors = plasma(len(values))
-        if df[color.value].dtype == object and all([val.isnumeric() for val in values]):
+        if all([val.isnumeric() for val in values]):
             values = sorted(values, key=lambda x: float(x))
         codes = dict(zip(values, range(len(values))))
         groups = [codes[val] for val in df[color.value].values]
@@ -60,7 +59,7 @@ def update_source(s):
         groups = pd.cut(df[size.value].values, len(SIZES))
         df["size"] = [SIZES[xx] for xx in groups.codes]
 
-        df["color"] = "#31AADE"
+    df["color"] = "#31AADE"
     if color.value != 'None' and color.value in quantileable:
         colors = plasma(default_color_count)
         groups = pd.cut(df[color.value].values, len(colors))
@@ -68,30 +67,28 @@ def update_source(s):
     elif color.value != 'None' and color.value in discrete_colorable:
         values = df[color.value][pd.notnull(df[color.value])].unique()
         colors = plasma(len(values))
-        if df[color.value].dtype == object and all([val.isnumeric() for val in values]):
+        if all([val.isnumeric() for val in values]):
             values = sorted(values, key=lambda x: float(x))
         codes = dict(zip(values, range(len(values))))
         groups = [codes[val] for val in df[color.value].values]
         df["color"] = [colors[xx] for xx in groups]
 
-    df["ns"] = df["northing"]
-    df["es"] = df["easting"]
-
     # create a ColumnDataSource from the  data set
-    s.data = s.from_df(df)
+    s.data["size"] = df["size"]
+    s.data["color"] = df["color"]
 
 
 def create_crossfilter(s):
     kw = dict()
     if x.value in discrete:
         values = df[x.value][pd.notnull(df[x.value])].unique()
-        if df[color.value].dtype == object and all([val.isnumeric() for val in values]):
+        if all([val.isnumeric() for val in values]):
             kw["x_range"] = sorted(values, key=lambda x: float(x))
         else:
             kw["x_range"] = sorted(values)
     if y.value in discrete:
         values = df[y.value][pd.notnull(df[y.value])].unique()
-        if df[color.value].dtype == object and all([val.isnumeric() for val in values]):
+        if all([val.isnumeric() for val in values]):
             kw["y_range"] = sorted(values, key=lambda x: float(x))
         else:
             kw["y_range"] = sorted(values)
@@ -99,7 +96,7 @@ def create_crossfilter(s):
     x_title = x.value.title()
     y_title = y.value.title()
 
-    p = figure(plot_height=600, plot_width=800, tools="wheel_zoom,reset,box_select", **kw,
+    p = figure(plot_height=600, plot_width=800, tools="wheel_zoom, reset, box_select", **kw,
                title="%s vs %s" % (x_title, y_title))
 
     if x.value in discrete:
@@ -116,7 +113,7 @@ def create_map(s):
     stamen = copy.copy(STAMEN_TERRAIN)
     # create map
     bound = 20000000  # meters
-    m = figure(tools="wheel_zoom,reset,box_select", x_range=(-bound, bound),
+    m = figure(tools="wheel_zoom, reset, box_select", x_range=(-bound, bound),
                y_range=(-bound, bound))
     m.axis.visible = False
     m.add_tile(stamen)
@@ -164,12 +161,10 @@ def create_jitter_buttons(s):
 
 # callbacks
 def x_change(attr, old, new):
-    update_source(source)
     layout.children[1] = create_crossfilter(source)
 
 
 def y_change(attr, old, new):
-    update_source(source)
     layout.children[1] = create_crossfilter(source)
 
 
@@ -185,7 +180,7 @@ def color_change(attr, old, new):
 df = get_data()
 
 # catigorize columns
-columns = list(df.columns)
+columns = [c for c in df.columns if c not in ["Decimal Latitude", "Decimal Longitude"]]
 discrete = [x for x in columns if df[x].dtype == object]
 discrete_colorable = [x for x in discrete if len(df[x].unique()) <= max(len(df["grp"].unique()),
                                                                         len(df[
