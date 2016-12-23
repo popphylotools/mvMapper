@@ -7,7 +7,9 @@ from bokeh.palettes import plasma
 from bokeh.plotting import curdoc, figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
 
+default_color_count = 11
 SIZES = list(range(6, 22, 3))
+
 
 
 def get_data():
@@ -18,51 +20,78 @@ def get_data():
 
     data.northing = data.northing.apply(lambda x: 15000000 if pd.isnull(x) else x)
     data.easting = data.easting.apply(lambda x: 0 if pd.isnull(x) else x)
+
+    data = data.applymap(lambda x: "NaN" if pd.isnull(x) else x)
     data = data.applymap(lambda x: "NaN" if pd.isnull(x) else x)
 
     return data
 
 
-def update_source(s):
+def create_source():
     df["size"] = 9
     if size.value != 'None':
-        groups = pd.qcut(df[size.value].values, len(SIZES))
+        groups = pd.cut(df[size.value].values, len(SIZES))
         df["size"] = [SIZES[xx] for xx in groups.codes]
 
         df["color"] = "#31AADE"
     if color.value != 'None' and color.value in quantileable:
-        colors = plasma(11)
-        groups = pd.qcut(df[color.value].values, len(colors))
+        colors = plasma(default_color_count)
+        groups = pd.cut(df[color.value].values, len(colors))
         df["color"] = [colors[xx] for xx in groups.codes]
     elif color.value != 'None' and color.value in discrete_colorable:
         values = df[color.value][pd.notnull(df[color.value])].unique()
         colors = plasma(len(values))
-        if all([val.isnumeric() for val in values]):
+        if df[color.value].dtype == object and all([val.isnumeric() for val in values]):
             values = sorted(values, key=lambda x: float(x))
         codes = dict(zip(values, range(len(values))))
         groups = [codes[val] for val in df[color.value].values]
         df["color"] = [colors[xx] for xx in groups]
 
-    df["xs"] = df[x.value]
-    df["ys"] = df[y.value]
     df["ns"] = df["northing"]
     df["es"] = df["easting"]
 
     # create a ColumnDataSource from the  data set
-    s.data = s.from_df(df[["ns", "es", "xs", "ys", "northing", "easting", "color", "size"]])
+    return ColumnDataSource(df)
+
+
+def update_source(s):
+    df["size"] = 9
+    if size.value != 'None':
+        groups = pd.cut(df[size.value].values, len(SIZES))
+        df["size"] = [SIZES[xx] for xx in groups.codes]
+
+        df["color"] = "#31AADE"
+    if color.value != 'None' and color.value in quantileable:
+        colors = plasma(default_color_count)
+        groups = pd.cut(df[color.value].values, len(colors))
+        df["color"] = [colors[xx] for xx in groups.codes]
+    elif color.value != 'None' and color.value in discrete_colorable:
+        values = df[color.value][pd.notnull(df[color.value])].unique()
+        colors = plasma(len(values))
+        if df[color.value].dtype == object and all([val.isnumeric() for val in values]):
+            values = sorted(values, key=lambda x: float(x))
+        codes = dict(zip(values, range(len(values))))
+        groups = [codes[val] for val in df[color.value].values]
+        df["color"] = [colors[xx] for xx in groups]
+
+    df["ns"] = df["northing"]
+    df["es"] = df["easting"]
+
+    # create a ColumnDataSource from the  data set
+    s.data = s.from_df(df)
 
 
 def create_crossfilter(s):
     kw = dict()
     if x.value in discrete:
         values = df[x.value][pd.notnull(df[x.value])].unique()
-        if all([val.isnumeric() for val in values]):
+        if df[color.value].dtype == object and all([val.isnumeric() for val in values]):
             kw["x_range"] = sorted(values, key=lambda x: float(x))
         else:
             kw["x_range"] = sorted(values)
     if y.value in discrete:
         values = df[y.value][pd.notnull(df[y.value])].unique()
-        if all([val.isnumeric() for val in values]):
+        if df[color.value].dtype == object and all([val.isnumeric() for val in values]):
             kw["y_range"] = sorted(values, key=lambda x: float(x))
         else:
             kw["y_range"] = sorted(values)
@@ -77,7 +106,7 @@ def create_crossfilter(s):
         p.xaxis.major_label_orientation = pd.np.pi / 4
 
     # plot data on crossfilter
-    p.circle(x="xs", y="ys", color="color", size="size", source=s, line_color="white",
+    p.circle(x=x.value, y=y.value, color="color", size="size", source=s, line_color="white",
              alpha=0.6)
 
     return p
@@ -133,28 +162,23 @@ def create_jitter_buttons(s):
     return map_jitter_button, reset_map_jitter_button
 
 
-def update():
-    update_source(source)
-    layout.children[1] = create_crossfilter(source)
-    layout.children[2] = create_map(source)
-    # layout.children[3] = widgetbox([*create_jitter_buttons(source)], width=200)
-
-
 # callbacks
 def x_change(attr, old, new):
-    update()
+    update_source(source)
+    layout.children[1] = create_crossfilter(source)
 
 
 def y_change(attr, old, new):
-    update()
+    update_source(source)
+    layout.children[1] = create_crossfilter(source)
 
 
 def size_change(attr, old, new):
-    update()
+    update_source(source)
 
 
 def color_change(attr, old, new):
-    update()
+    update_source(source)
 
 
 # load data
@@ -183,10 +207,7 @@ color = Select(title='Color', value='assign', options=['None'] + quantileable + 
 color.on_change('value', color_change)
 
 # initilize source
-source = ColumnDataSource(
-    data=dict(ns=[], es=[], xs=[], ys=[], northing=[], easting=[], color=[], size=[]))
-
-update_source(source)
+source = create_source()
 
 # initialize plots
 crossfilter = create_crossfilter(source)
