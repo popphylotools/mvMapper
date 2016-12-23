@@ -23,6 +23,35 @@ def get_data():
     return data
 
 
+def update_source(s):
+    df["size"] = 9
+    if size.value != 'None':
+        groups = pd.qcut(df[size.value].values, len(SIZES))
+        df["size"] = [SIZES[xx] for xx in groups.codes]
+
+        df["color"] = "#31AADE"
+    if color.value != 'None' and color.value in quantileable:
+        colors = plasma(11)
+        groups = pd.qcut(df[color.value].values, len(colors))
+        df["color"] = [colors[xx] for xx in groups.codes]
+    elif color.value != 'None' and color.value in discrete_colorable:
+        values = df[color.value][pd.notnull(df[color.value])].unique()
+        colors = plasma(len(values))
+        if all([val.isnumeric() for val in values]):
+            values = sorted(values, key=lambda x: float(x))
+        codes = dict(zip(values, range(len(values))))
+        groups = [codes[val] for val in df[color.value].values]
+        df["color"] = [colors[xx] for xx in groups]
+
+    df["xs"] = df[x.value]
+    df["ys"] = df[y.value]
+    df["ns"] = df["northing"]
+    df["es"] = df["easting"]
+
+    # create a ColumnDataSource from the  data set
+    s.data = s.from_df(df[["ns", "es", "xs", "ys", "northing", "easting", "color", "size"]])
+
+
 def create_crossfilter(s):
     kw = dict()
     if x.value in discrete:
@@ -52,35 +81,6 @@ def create_crossfilter(s):
              alpha=0.6)
 
     return p
-
-
-def create_source():
-    df["size"] = 9
-    if size.value != 'None':
-        groups = pd.qcut(df[size.value].values, len(SIZES))
-        df["size"] = [SIZES[xx] for xx in groups.codes]
-
-        df["color"] = "#31AADE"
-    if color.value != 'None' and color.value in quantileable:
-        colors = plasma(11)
-        groups = pd.qcut(df[color.value].values, len(colors))
-        df["color"] = [colors[xx] for xx in groups.codes]
-    elif color.value != 'None' and color.value in discrete_colorable:
-        values = df[color.value][pd.notnull(df[color.value])].unique()
-        colors = plasma(len(values))
-        if all([val.isnumeric() for val in values]):
-            values = sorted(values, key=lambda x: float(x))
-        codes = dict(zip(values, range(len(values))))
-        groups = [codes[val] for val in df[color.value].values]
-        df["color"] = [colors[xx] for xx in groups]
-
-    df["xs"] = df[x.value]
-    df["ys"] = df[y.value]
-    df["ns"] = df["northing"]
-    df["es"] = df["easting"]
-
-    # create a ColumnDataSource from the  data set
-    return ColumnDataSource(df[["ns", "es", "xs", "ys", "northing", "easting", "color", "size"]])
 
 
 def create_map(s):
@@ -134,10 +134,10 @@ def create_jitter_buttons(s):
 
 
 def update():
-    source = create_source()
+    update_source(source)
     layout.children[1] = create_crossfilter(source)
     layout.children[2] = create_map(source)
-    layout.children[3] = widgetbox([*create_jitter_buttons(source)], width=200)
+    # layout.children[3] = widgetbox([*create_jitter_buttons(source)], width=200)
 
 
 # callbacks
@@ -157,10 +157,10 @@ def color_change(attr, old, new):
     update()
 
 
+# load data
 df = get_data()
-# source = ColumnDataSource(
-#     data=dict(ns=[], es=[], xs=[], ys=[], northing=[], easting=[], color=[], size=[]))
 
+# catigorize columns
 columns = list(df.columns)
 discrete = [x for x in columns if df[x].dtype == object]
 discrete_colorable = [x for x in discrete if len(df[x].unique()) <= max(len(df["grp"].unique()),
@@ -169,7 +169,7 @@ discrete_colorable = [x for x in discrete if len(df[x].unique()) <= max(len(df["
 continuous = [x for x in columns if x not in discrete]
 quantileable = [x for x in continuous if len(df[x].unique()) > 20]
 
-# widgets
+# create widgets
 x = Select(title='X-Axis', value='LD1', options=columns)
 x.on_change('value', x_change)
 
@@ -182,16 +182,19 @@ size.on_change('value', size_change)
 color = Select(title='Color', value='assign', options=['None'] + quantileable + discrete_colorable)
 color.on_change('value', color_change)
 
-# initilize data
-initial_source = create_source()
+# initilize source
+source = ColumnDataSource(
+    data=dict(ns=[], es=[], xs=[], ys=[], northing=[], easting=[], color=[], size=[]))
+
+update_source(source)
 
 # initialize plots
-crossfilter = create_crossfilter(initial_source)
-map = create_map(initial_source)
+crossfilter = create_crossfilter(source)
+map = create_map(source)
 
-# layout
+# create layout
 crossfilter_controls = widgetbox([x, y, color, size], width=200)
-map_controls = widgetbox([*create_jitter_buttons(initial_source)], width=200)
+map_controls = widgetbox([*create_jitter_buttons(source)], width=200)
 layout = row(crossfilter_controls, crossfilter, map, map_controls)
 
 curdoc().add_root(layout)
