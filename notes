@@ -1,0 +1,16 @@
+# read and write object
+saveRDS(dapc, file = "dapc.txt", ascii = TRUE, compress = FALSE)
+dapc = readRDS("dapc.txt")
+
+# write csv
+for (name in names(dapc4)[!is.element(names(dapc4), list("call"))]) { write.csv(dapc4[name], file = paste(name, "csv", sep="."), na="") }
+
+# plot w/ bokeh
+p <- figure() %>%
+ly_points(LD1, LD2, data=dapc4$ind.coord, color=dapc4$assign)
+p
+
+# capture png
+png("plot.png")
+scatter(dapc4)
+dev.off()

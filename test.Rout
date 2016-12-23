@@ -1,0 +1,45 @@
+
+R version 3.3.2 (2016-10-31) -- "Sincere Pumpkin Patch"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #!/usr/bin/env R
+> 
+> library(adegenet)
+Loading required package: ade4
+
+   /// adegenet 2.0.2 is loaded ////////////
+
+   > overview: '?adegenet'
+   > tutorials/doc/questions: 'adegenetWeb()' 
+   > bug reports/feature requests: adegenetIssues()
+
+
+> 
+> bcur <- read.structure("world_bcur_97outliers.str", n.ind=224, n.loc=97,  onerowperind=F, col.lab=1, col.pop=2, col.others=c(3,4,5,6), row.marknames=NULL, NA.char="-9", ask=FALSE, quiet=FALSE)
+
+ Converting data from a STRUCTURE .stru file to a genind object... 
+
+> dapc1 <-dapc(bcur, n.pca=20, n.da=200)
+> 
+> saveRDS(dapc, file = "dapc.txt", ascii = TRUE, compress = FALSE)
+> 
+> for (name in names(dapc1)[is.element(names(dapc1), list("assign", "eig", "ind.coord", "posterior", "grp"))]) { write.csv(dapc1[name], file = paste(name, "csv", sep="."), na="") }
+> 
+> proc.time()
+   user  system elapsed 
+  2.497   0.121   2.617 
