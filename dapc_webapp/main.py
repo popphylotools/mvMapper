@@ -13,7 +13,7 @@ SIZES = list(range(6, 22, 3))
 
 
 def get_data():
-    data = pd.read_csv("../bcur_munged.csv")
+    data = pd.read_csv("../data/bcur_munged.csv")
 
     data['grp'] = data['grp'].apply(str)
     data['assign'] = data['assign'].apply(str)
