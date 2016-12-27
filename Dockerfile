@@ -1,6 +1,7 @@
-# consult: https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#/add-or-copy
 FROM continuumio/anaconda3
 MAINTAINER forest.bremer@gmail.com
+
+RUN conda install -y pyproj
 
 ENV BOKEH_APP /bokeh/dapc_webapp/
 ENV APP_URL localhost
@@ -11,6 +12,7 @@ WORKDIR /bokeh
 
 COPY dapc_webapp /bokeh/dapc_webapp
 COPY data /bokeh/data
-COPY entrypoint.sh /bokeh/
+COPY webapp.sh /bokeh/
+COPY dataprep.sh /bokeh/
 
-CMD ["sh", "entrypoint.sh"]
+CMD ["sh", "webapp.sh"]

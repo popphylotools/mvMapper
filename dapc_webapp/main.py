@@ -6,6 +6,7 @@ from bokeh.models import Select, CustomJS, Button
 from bokeh.palettes import plasma
 from bokeh.plotting import curdoc, figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
+import pyproj
 
 default_color_count = 11
 SIZES = list(range(6, 22, 3))
@@ -18,10 +19,23 @@ def get_data():
     data['grp'] = data['grp'].apply(str)
     data['assign'] = data['assign'].apply(str)
 
-    data.northing = data.northing.apply(lambda x: 15000000 if pd.isnull(x) else x)
-    data.easting = data.easting.apply(lambda x: 0 if pd.isnull(x) else x)
 
     data = data.applymap(lambda x: "NaN" if pd.isnull(x) else x)
+
+    # transform coords to map projection
+    wgs84 = pyproj.Proj(init="epsg:4326")
+    webMer = pyproj.Proj(init="epsg:3857")
+    data["easting"] = "NaN"
+    data["northing"] = "NaN"
+    data["easting"] = data["easting"].astype("float64")
+    data["northing"] = data["northing"].astype("float64")
+    data.loc[pd.notnull(data["Decimal Longitude"]), "easting"], data.loc[pd.notnull(data["Decimal Latitude"]), "northing"] = zip(
+        *data.loc[pd.notnull(data["Decimal Longitude"]) & pd.notnull(data["Decimal Latitude"])].apply(
+            lambda x: pyproj.transform(wgs84, webMer, x["Decimal Longitude"], x["Decimal Latitude"]), axis=1))
+
+    # show unknown locations on map in arctic
+    data.northing = data.northing.apply(lambda x: -15000000 if pd.isnull(x) else x)
+    data.easting = data.easting.apply(lambda x: 0 if pd.isnull(x) else x)
 
     return data
 
