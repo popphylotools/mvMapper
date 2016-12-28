@@ -43,6 +43,8 @@ COPY data /bokeh/data
 COPY R /bokeh/R
 COPY python /bokeh/python
 
+VOLUME ["/bokeh/data"]
+
 COPY entrypoint.sh /bokeh/
 
 CMD ["sh", "entrypoint.sh"]
