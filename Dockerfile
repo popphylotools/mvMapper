@@ -41,9 +41,8 @@ WORKDIR /bokeh
 COPY dapc_webapp /bokeh/dapc_webapp
 COPY data /bokeh/data
 COPY R /bokeh/R
+COPY python /bokeh/python
 
-COPY webapp.sh /bokeh/
-COPY dataprep.sh /bokeh/
-COPY dataprep.py /bokeh/
+COPY entrypoint.sh /bokeh/
 
-CMD ["sh", "webapp.sh"]
+CMD ["sh", "entrypoint.sh"]
