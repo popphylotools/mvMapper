@@ -29,9 +29,9 @@ def get_data():
     data["northing"] = "NaN"
     data["easting"] = data["easting"].astype("float64")
     data["northing"] = data["northing"].astype("float64")
-    data.loc[pd.notnull(data["Decimal Longitude"]), "easting"], data.loc[pd.notnull(data["Decimal Latitude"]), "northing"] = zip(
-        *data.loc[pd.notnull(data["Decimal Longitude"]) & pd.notnull(data["Decimal Latitude"])].apply(
-            lambda x: pyproj.transform(wgs84, webMer, x["Decimal Longitude"], x["Decimal Latitude"]), axis=1))
+    data.loc[pd.notnull(data["Lng"]), "easting"], data.loc[pd.notnull(data["Lat"]), "northing"] = zip(
+        *data.loc[pd.notnull(data["Lng"]) & pd.notnull(data["Lat"])].apply(
+            lambda x: pyproj.transform(wgs84, webMer, x["Lng"], x["Lat"]), axis=1))
 
     # show unknown locations on map in arctic
     data.northing = data.northing.apply(lambda x: -15000000 if pd.isnull(x) else x)
@@ -111,7 +111,7 @@ def create_crossfilter(s):
     y_title = y.value.title()
 
     p = figure(plot_height=600, plot_width=800, tools="wheel_zoom, reset, box_select", **kw,
-               title="%s vs %s" % (x_title, y_title))
+               title="%s vs %s" % (y_title, x_title))
 
     if x.value in discrete:
         p.xaxis.major_label_orientation = pd.np.pi / 4
@@ -194,7 +194,7 @@ def color_change(attr, old, new):
 df = get_data()
 
 # catigorize columns
-columns = [c for c in df.columns if c not in ["Decimal Latitude", "Decimal Longitude"]]
+columns = [c for c in df.columns if c not in ["Lat", "Lng"]]
 discrete = [x for x in columns if df[x].dtype == object]
 discrete_colorable = [x for x in discrete if len(df[x].unique()) <= max(len(df["grp"].unique()),
                                                                         len(df[
