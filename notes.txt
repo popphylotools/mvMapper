@@ -14,3 +14,7 @@ p
 png("plot.png")
 scatter(dapc4)
 dev.off()
+
+# running docker
+docker run -v /Users/forestb/dev/pca/data:/bokeh/data dapc_webapp sh dataprep.sh
+docker run -d -p 5006:5006 -v /Users/forestb/dev/pca/data:/bokeh/data dapc_webapp

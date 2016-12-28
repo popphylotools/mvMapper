@@ -1,17 +1,12 @@
-
+#!/usr/bin/env python
 # coding: utf-8
-
-# In[ ]:
 
 import os
 
 import pandas as pd
 import numpy as np
 
-data_directory = "../data/"
-
-
-# In[ ]:
+data_directory = "./data/"
 
 # read in csv's from dapc analisis in R
 fns = {fn.strip().split(".csv")[0]:fn for fn in os.listdir(data_directory) if fn in ["assign.csv", "eig.csv", "ind.coord.csv", "posterior.csv", "grp.csv"]}
@@ -33,15 +28,9 @@ df = dfs["ind.coord"].rename(columns=lambda x: x.split(".")[-1] if "ind.coord." 
 df = df.join([dfs["assign"]["assign"], dfs["grp"]["grp"],
               posterior["posterior_assign"], posterior["posterior_grp"]])
 
-
-# In[ ]:
-
 # append location information
 loc_df = pd.read_csv(data_directory + "location.csv")
 df = df.merge(loc_df, on="key", how="left")
-
-
-# In[ ]:
 
 # clean up nulls
 df = df.applymap(lambda x: "NaN" if pd.isnull(x) else x)
