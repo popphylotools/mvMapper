@@ -5,5 +5,3 @@ bcur <- read.structure("world_bcur_97outliers.str", n.ind=224, n.loc=97,  onerow
 dapc1 <-dapc(bcur, n.pca=20, n.da=200)
 
 saveRDS(dapc1, file = "dapc.txt", ascii = TRUE, compress = FALSE)
-
-for (name in names(dapc1)[is.element(names(dapc1), list("assign", "eig", "ind.coord", "posterior", "grp"))]) { write.csv(dapc1[name], file = paste(name, "csv", sep="."), na="") }
