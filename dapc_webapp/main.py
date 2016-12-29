@@ -43,13 +43,19 @@ def get_data():
 def create_source():
     df["size"] = 9
     if size.value != 'None':
-        groups = pd.cut(df[size.value].values, len(SIZES))
+        try:
+            groups = pd.qcut(df[size.value].values, len(SIZES))
+        except ValueError:
+            groups = pd.cut(df[size.value].values, len(SIZES))
         df["size"] = [SIZES[xx] for xx in groups.codes]
 
     df["color"] = "#31AADE"
     if color.value != 'None' and color.value in quantileable:
         colors = plasma(default_color_count)
-        groups = pd.cut(df[color.value].values, len(colors))
+        try:
+            groups = pd.qcut(df[color.value].values, len(colors))
+        except ValueError:
+            groups = pd.cut(df[color.value].values, len(colors))
         df["color"] = [colors[xx] for xx in groups.codes]
     elif color.value != 'None' and color.value in discrete_colorable:
         values = df[color.value][pd.notnull(df[color.value])].unique()
@@ -70,13 +76,19 @@ def create_source():
 def update_source(s):
     df["size"] = 9
     if size.value != 'None':
-        groups = pd.cut(df[size.value].values, len(SIZES))
+        try:
+            groups = pd.qcut(df[size.value].values, len(SIZES))
+        except ValueError:
+            groups = pd.cut(df[size.value].values, len(SIZES))
         df["size"] = [SIZES[xx] for xx in groups.codes]
 
     df["color"] = "#31AADE"
     if color.value != 'None' and color.value in quantileable:
         colors = plasma(default_color_count)
-        groups = pd.cut(df[color.value].values, len(colors))
+        try:
+            groups = pd.qcut(df[color.value].values, len(colors))
+        except ValueError:
+            groups = pd.cut(df[color.value].values, len(colors))
         df["color"] = [colors[xx] for xx in groups.codes]
     elif color.value != 'None' and color.value in discrete_colorable:
         values = df[color.value][pd.notnull(df[color.value])].unique()
