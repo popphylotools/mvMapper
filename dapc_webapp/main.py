@@ -1,8 +1,7 @@
 import copy
 import pandas as pd
 from bokeh.layouts import row, widgetbox
-from bokeh.models import Jitter
-from bokeh.models import Select, CustomJS, Button
+from bokeh.models import Select, CustomJS, Button, Jitter, HoverTool
 from bokeh.palettes import plasma
 from bokeh.plotting import curdoc, figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
@@ -122,8 +121,40 @@ def create_crossfilter(s):
     x_title = x.value.title()
     y_title = y.value.title()
 
-    p = figure(plot_height=600, plot_width=800, tools="wheel_zoom, reset, box_select", **kw,
-               title="%s vs %s" % (y_title, x_title))
+    p = figure(plot_height=600, plot_width=800,
+               tools="wheel_zoom, pan, save, reset, box_select, tap, hover",
+               active_drag="box_select", active_scroll="wheel_zoom",
+               title="%s vs %s" % (y_title, x_title),
+               **kw,)
+
+    p.select_one(HoverTool).tooltips = """
+        <div>
+            <div>
+                <span style="font-size: 12px; color: #000; font-weight: bold;">key</span>
+                <span style="font-size: 12px; color: #000;">@key</span>
+            </div>
+            <div>
+                <span style="font-size: 12px; color: #000; font-weight: bold;">assign</span>
+                <span style="font-size: 12px; color: #000;">@assign</span>
+            </div>
+            <div>
+                <span style="font-size: 12px; color: #000; font-weight: bold;">grp</span>
+                <span style="font-size: 12px; color: #000;">@grp</span>
+            </div>
+            <div>
+                <span style="font-size: 12px; color: #000; font-weight: bold;">posterior_assign</span>
+                <span style="font-size: 12px; color: #000;">@posterior_assign</span>
+            </div>
+            <div>
+                <span style="font-size: 12px; color: #000; font-weight: bold;">posterior_grp</span>
+                <span style="font-size: 12px; color: #000;">@posterior_grp</span>
+            </div>
+            <div>
+                <span style="font-size: 12px; color: #000; font-weight: bold;">(Long, Lat)</span>
+                <span style="font-size: 12px; color: #000;">(@Lng, @Lat)</span>
+            </div>
+        </div>
+        """
 
     if x.value in discrete:
         p.xaxis.major_label_orientation = pd.np.pi / 4
@@ -139,10 +170,40 @@ def create_map(s):
     stamen = copy.copy(STAMEN_TERRAIN)
     # create map
     bound = 20000000  # meters
-    m = figure(tools="wheel_zoom, reset, box_select", x_range=(-bound, bound),
-               y_range=(-bound, bound))
+    m = figure(tools="wheel_zoom, pan, reset, box_select, tap, hover",
+               active_drag="box_select", active_scroll="wheel_zoom",
+               x_range=(-bound, bound), y_range=(-bound, bound))
     m.axis.visible = False
     m.add_tile(stamen)
+
+    m.select_one(HoverTool).tooltips = """
+        <div>
+            <div>
+                <span style="font-size: 12px; color: #000; font-weight: bold;">key</span>
+                <span style="font-size: 12px; color: #000;">@key</span>
+            </div>
+            <div>
+                <span style="font-size: 12px; color: #000; font-weight: bold;">assign</span>
+                <span style="font-size: 12px; color: #000;">@assign</span>
+            </div>
+            <div>
+                <span style="font-size: 12px; color: #000; font-weight: bold;">grp</span>
+                <span style="font-size: 12px; color: #000;">@grp</span>
+            </div>
+            <div>
+                <span style="font-size: 12px; color: #000; font-weight: bold;">posterior_assign</span>
+                <span style="font-size: 12px; color: #000;">@posterior_assign</span>
+            </div>
+            <div>
+                <span style="font-size: 12px; color: #000; font-weight: bold;">posterior_grp</span>
+                <span style="font-size: 12px; color: #000;">@posterior_grp</span>
+            </div>
+            <div>
+                <span style="font-size: 12px; color: #000; font-weight: bold;">(Long, Lat)</span>
+                <span style="font-size: 12px; color: #000;">(@Lng, @Lat)</span>
+            </div>
+        </div>
+        """
 
     # plot data on world map
     m.circle(x="es", y="ns", color="color", size="size", source=s, line_color="white",
