@@ -1,7 +1,7 @@
 import copy
 import pandas as pd
-from bokeh.layouts import row, widgetbox
-from bokeh.models import Select, CustomJS, Button, Jitter, HoverTool
+from bokeh.layouts import row, widgetbox, column
+from bokeh.models import Select, CustomJS, Button, Jitter, DataTable, TableColumn
 from bokeh.palettes import plasma
 from bokeh.plotting import curdoc, figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
@@ -122,39 +122,10 @@ def create_crossfilter(s):
     y_title = y.value.title()
 
     p = figure(plot_height=600, plot_width=800,
-               tools="wheel_zoom, pan, save, reset, box_select, tap, hover",
+               tools="wheel_zoom, pan, save, reset, box_select, tap",
                active_drag="box_select", active_scroll="wheel_zoom",
                title="%s vs %s" % (y_title, x_title),
                **kw,)
-
-    p.select_one(HoverTool).tooltips = """
-        <div>
-            <div>
-                <span style="font-size: 12px; color: #000; font-weight: bold;">key</span>
-                <span style="font-size: 12px; color: #000;">@key</span>
-            </div>
-            <div>
-                <span style="font-size: 12px; color: #000; font-weight: bold;">assign</span>
-                <span style="font-size: 12px; color: #000;">@assign</span>
-            </div>
-            <div>
-                <span style="font-size: 12px; color: #000; font-weight: bold;">grp</span>
-                <span style="font-size: 12px; color: #000;">@grp</span>
-            </div>
-            <div>
-                <span style="font-size: 12px; color: #000; font-weight: bold;">posterior_assign</span>
-                <span style="font-size: 12px; color: #000;">@posterior_assign</span>
-            </div>
-            <div>
-                <span style="font-size: 12px; color: #000; font-weight: bold;">posterior_grp</span>
-                <span style="font-size: 12px; color: #000;">@posterior_grp</span>
-            </div>
-            <div>
-                <span style="font-size: 12px; color: #000; font-weight: bold;">(Long, Lat)</span>
-                <span style="font-size: 12px; color: #000;">(@Lng, @Lat)</span>
-            </div>
-        </div>
-        """
 
     if x.value in discrete:
         p.xaxis.major_label_orientation = pd.np.pi / 4
@@ -170,40 +141,11 @@ def create_map(s):
     stamen = copy.copy(STAMEN_TERRAIN)
     # create map
     bound = 20000000  # meters
-    m = figure(tools="wheel_zoom, pan, reset, box_select, tap, hover",
+    m = figure(tools="wheel_zoom, pan, reset, box_select, tap",
                active_drag="box_select", active_scroll="wheel_zoom",
                x_range=(-bound, bound), y_range=(-bound, bound))
     m.axis.visible = False
     m.add_tile(stamen)
-
-    m.select_one(HoverTool).tooltips = """
-        <div>
-            <div>
-                <span style="font-size: 12px; color: #000; font-weight: bold;">key</span>
-                <span style="font-size: 12px; color: #000;">@key</span>
-            </div>
-            <div>
-                <span style="font-size: 12px; color: #000; font-weight: bold;">assign</span>
-                <span style="font-size: 12px; color: #000;">@assign</span>
-            </div>
-            <div>
-                <span style="font-size: 12px; color: #000; font-weight: bold;">grp</span>
-                <span style="font-size: 12px; color: #000;">@grp</span>
-            </div>
-            <div>
-                <span style="font-size: 12px; color: #000; font-weight: bold;">posterior_assign</span>
-                <span style="font-size: 12px; color: #000;">@posterior_assign</span>
-            </div>
-            <div>
-                <span style="font-size: 12px; color: #000; font-weight: bold;">posterior_grp</span>
-                <span style="font-size: 12px; color: #000;">@posterior_grp</span>
-            </div>
-            <div>
-                <span style="font-size: 12px; color: #000; font-weight: bold;">(Long, Lat)</span>
-                <span style="font-size: 12px; color: #000;">(@Lng, @Lat)</span>
-            </div>
-        </div>
-        """
 
     # plot data on world map
     m.circle(x="es", y="ns", color="color", size="size", source=s, line_color="white",
@@ -245,14 +187,18 @@ def create_jitter_buttons(s):
 
     return map_jitter_button, reset_map_jitter_button
 
+def create_table(cols, s):
+    table_cols = [TableColumn(field=col, title=col) for col in cols]
+    return DataTable(source=s, columns=table_cols, width=1200)
+
 
 # callbacks
 def x_change(attr, old, new):
-    layout.children[1] = create_crossfilter(source)
+    layout.children[0].children[1] = create_crossfilter(source)
 
 
 def y_change(attr, old, new):
-    layout.children[1] = create_crossfilter(source)
+    layout.children[0].children[1] = create_crossfilter(source)
 
 
 def size_change(attr, old, new):
@@ -262,12 +208,15 @@ def size_change(attr, old, new):
 def color_change(attr, old, new):
     update_source(source)
 
+def selection_change(attrname, old, new):
+    selected = source.selected['1d']['indices']
+    table_source.data = table_source.from_df(df.iloc[selected, :])
 
 # load data
 df = get_data()
 
 # catigorize columns
-columns = [c for c in df.columns if c not in ["Lat", "Lng"]]
+columns = [c for c in df.columns]
 discrete = [x for x in columns if df[x].dtype == object]
 discrete_colorable = [x for x in discrete if len(df[x].unique()) <= max(len(df["grp"].unique()),
                                                                         len(df[
@@ -290,6 +239,9 @@ color.on_change('value', color_change)
 
 # initilize source
 source = create_source()
+source.on_change('selected', selection_change)
+
+table_source = ColumnDataSource(df)
 
 # initialize plots
 crossfilter = create_crossfilter(source)
@@ -298,7 +250,8 @@ map = create_map(source)
 # create layout
 crossfilter_controls = widgetbox([x, y, color, size], width=200)
 map_controls = widgetbox([*create_jitter_buttons(source)], width=200)
-layout = row(crossfilter_controls, crossfilter, map, map_controls)
+table = widgetbox(create_table([col for col in columns if ("LD" not in col) and (col not in ["northing", "easting"])], table_source))
+layout = column(row(crossfilter_controls, crossfilter, map, map_controls), table)
 
 curdoc().add_root(layout)
 curdoc().title = "Crossfilter"
