@@ -132,7 +132,17 @@ def create_crossfilter(s):
 
     # plot data on crossfilter
     p.circle(x=x.value, y=y.value, color="color", size="size", source=s, line_color="white",
-             alpha=0.6)
+                    alpha=0.6,
+                    # set visual properties for selected glyphs
+                    selection_color="color",
+                    selection_line_color="white",
+                    selection_line_alpha=0.6,
+
+                    # set visual properties for non-selected glyphs
+                    nonselection_fill_alpha=0.0,
+                    nonselection_fill_color="color",
+                    nonselection_line_color="color",
+                    nonselection_line_alpha=1.0,)
 
     return p
 
@@ -149,8 +159,17 @@ def create_map(s):
 
     # plot data on world map
     m.circle(x="es", y="ns", color="color", size="size", source=s, line_color="white",
-             alpha=0.6,
-             hover_color='white', hover_alpha=0.5)
+                    alpha=0.6,
+                    # set visual properties for selected glyphs
+                    selection_color="color",
+                    selection_line_color="white",
+                    selection_line_alpha=0.6,
+
+                    # set visual properties for non-selected glyphs
+                    nonselection_fill_alpha=0.0,
+                    nonselection_fill_color="color",
+                    nonselection_line_color="color",
+                    nonselection_line_alpha=1.0,)
 
     return m
 
