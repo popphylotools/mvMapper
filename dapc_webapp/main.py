@@ -1,6 +1,6 @@
 import copy
 import pandas as pd
-from bokeh.layouts import row, widgetbox, column
+from bokeh.layouts import row, widgetbox, layout
 from bokeh.models import Select, CustomJS, Button, Jitter, DataTable, TableColumn
 from bokeh.palettes import plasma
 from bokeh.plotting import curdoc, figure, ColumnDataSource
@@ -120,7 +120,7 @@ def create_crossfilter(s):
     x_title = x.value.title()
     y_title = y.value.title()
 
-    p = figure(plot_height=600, plot_width=600,
+    p = figure(plot_height=700, plot_width=700, #responsive=True,
                tools="wheel_zoom, pan, save, reset, box_select, tap",
                active_drag="box_select", active_scroll="wheel_zoom",
                title="%s vs %s" % (y_title, x_title),
@@ -139,8 +139,8 @@ def create_crossfilter(s):
                     selection_line_alpha=0.6,
 
                     # set visual properties for non-selected glyphs
-                    nonselection_fill_color="color",
-                    nonselection_fill_alpha=0.0,
+                    nonselection_fill_color="black",
+                    nonselection_fill_alpha=0.01,
                     nonselection_line_color="color",
                     nonselection_line_alpha=0.6,)
 
@@ -151,7 +151,7 @@ def create_map(s):
     stamen = copy.copy(STAMEN_TERRAIN)
     # create map
     bound = 20000000  # meters
-    m = figure(plot_height=700, plot_width=700,
+    m = figure(plot_height=700, plot_width=700, #responsive=True,
                tools="wheel_zoom, pan, reset, box_select, tap",
                active_drag="box_select", active_scroll="wheel_zoom",
                x_range=(-bound, bound), y_range=(-bound, bound))
@@ -168,12 +168,17 @@ def create_map(s):
                     selection_line_alpha=0.6,
 
                     # set visual properties for non-selected glyphs
-                    nonselection_fill_color="color",
-                    nonselection_fill_alpha=0.0,
+                    nonselection_fill_color="black",
+                    nonselection_fill_alpha=0.01,
                     nonselection_line_color="color",
                     nonselection_line_alpha=0.6,)
 
     return m
+
+
+def create_table(cols, s):
+    table_cols = [TableColumn(field=col, title=col) for col in cols]
+    return DataTable(source=s, columns=table_cols, width=1600, fit_columns=False, )
 
 
 def create_jitter_buttons(s):
@@ -208,18 +213,14 @@ def create_jitter_buttons(s):
 
     return map_jitter_button, reset_map_jitter_button
 
-def create_table(cols, s):
-    table_cols = [TableColumn(field=col, title=col) for col in cols]
-    return DataTable(source=s, columns=table_cols, width=1600)
-
 
 # callbacks
 def x_change(attr, old, new):
-    layout.children[0].children[1] = create_crossfilter(source)
+    l.children[0].children[1] = create_crossfilter(source)
 
 
 def y_change(attr, old, new):
-    layout.children[0].children[1] = create_crossfilter(source)
+    l.children[0].children[1] = create_crossfilter(source)
 
 
 def size_change(attr, old, new):
@@ -271,7 +272,11 @@ map = create_map(source)
 # create layout
 controls = widgetbox([x, y, color, size] + [*create_jitter_buttons(source)], width=200)
 table = widgetbox(create_table([col for col in columns if ("LD" not in col) and (col not in ["northing", "easting"])], table_source))
-layout = column(row(controls, crossfilter, map), row(table))
+l = layout([
+    [controls, crossfilter, map],
+    [row(table)]
+])
 
-curdoc().add_root(layout)
+
+curdoc().add_root(l)
 curdoc().title = "Crossfilter"
