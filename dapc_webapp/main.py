@@ -178,7 +178,7 @@ def create_map(s):
 
 def create_table(cols, s):
     table_cols = [TableColumn(field=col, title=col) for col in cols]
-    return DataTable(source=s, columns=table_cols, width=1600, fit_columns=False, )
+    return DataTable(source=s, columns=table_cols, width=1600, height=250, fit_columns=False, )
 
 
 def create_jitter_buttons(s):
