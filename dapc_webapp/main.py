@@ -99,8 +99,7 @@ def update_source(s):
         df["color"] = [colors[xx] for xx in groups]
 
     # create a ColumnDataSource from the  data set
-    s.data["size"] = df["size"]
-    s.data["color"] = df["color"]
+    s.data.update({"size":df["size"], "color":df["color"]})
 
 
 def create_crossfilter(s):
@@ -121,7 +120,7 @@ def create_crossfilter(s):
     x_title = x.value.title()
     y_title = y.value.title()
 
-    p = figure(plot_height=600, plot_width=800,
+    p = figure(plot_height=600, plot_width=600,
                tools="wheel_zoom, pan, save, reset, box_select, tap",
                active_drag="box_select", active_scroll="wheel_zoom",
                title="%s vs %s" % (y_title, x_title),
@@ -142,7 +141,7 @@ def create_crossfilter(s):
                     nonselection_fill_alpha=0.0,
                     nonselection_fill_color="color",
                     nonselection_line_color="color",
-                    nonselection_line_alpha=1.0,)
+                    nonselection_line_alpha=0.6,)
 
     return p
 
@@ -151,7 +150,8 @@ def create_map(s):
     stamen = copy.copy(STAMEN_TERRAIN)
     # create map
     bound = 20000000  # meters
-    m = figure(tools="wheel_zoom, pan, reset, box_select, tap",
+    m = figure(plot_height=700, plot_width=700,
+               tools="wheel_zoom, pan, reset, box_select, tap",
                active_drag="box_select", active_scroll="wheel_zoom",
                x_range=(-bound, bound), y_range=(-bound, bound))
     m.axis.visible = False
@@ -169,21 +169,21 @@ def create_map(s):
                     nonselection_fill_alpha=0.0,
                     nonselection_fill_color="color",
                     nonselection_line_color="color",
-                    nonselection_line_alpha=1.0,)
+                    nonselection_line_alpha=0.6,)
 
     return m
 
 
 def create_jitter_buttons(s):
-    map_jitter = Jitter(width=16093, distribution="uniform")
+    map_jitter = Jitter(width=16093, distribution="normal")
 
     jitter_callback = CustomJS(args=dict(source=s, map_jitter=map_jitter), code="""
         var data = source.data;
         for (var i = 0; i < data['easting'].length; i++) {
-            data['es'][i] = map_jitter.compute(data['easting'][i]);
+            data['es'][i] = map_jitter.compute(data['es'][i]);
         }
         for (var i = 0; i < data['northing'].length; i++) {
-            data['ns'][i] = map_jitter.compute(data['northing'][i]);
+            data['ns'][i] = map_jitter.compute(data['ns'][i]);
         }
         source.trigger('change');
     """)
@@ -208,7 +208,7 @@ def create_jitter_buttons(s):
 
 def create_table(cols, s):
     table_cols = [TableColumn(field=col, title=col) for col in cols]
-    return DataTable(source=s, columns=table_cols, width=1200)
+    return DataTable(source=s, columns=table_cols, width=1600)
 
 
 # callbacks
@@ -267,10 +267,9 @@ crossfilter = create_crossfilter(source)
 map = create_map(source)
 
 # create layout
-crossfilter_controls = widgetbox([x, y, color, size], width=200)
-map_controls = widgetbox([*create_jitter_buttons(source)], width=200)
+controls = widgetbox([x, y, color, size] + [*create_jitter_buttons(source)], width=200)
 table = widgetbox(create_table([col for col in columns if ("LD" not in col) and (col not in ["northing", "easting"])], table_source))
-layout = column(row(crossfilter_controls, crossfilter, map, map_controls), table)
+layout = column(row(controls, crossfilter, map), row(table))
 
 curdoc().add_root(layout)
 curdoc().title = "Crossfilter"
