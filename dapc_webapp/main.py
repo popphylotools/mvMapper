@@ -133,13 +133,14 @@ def create_crossfilter(s):
     p.circle(x=x.value, y=y.value, color="color", size="size", source=s, line_color="white",
                     alpha=0.6,
                     # set visual properties for selected glyphs
-                    selection_color="color",
+                    selection_fill_color="color",
+                    selection_fill_alpha=0.6,
                     selection_line_color="white",
                     selection_line_alpha=0.6,
 
                     # set visual properties for non-selected glyphs
-                    nonselection_fill_alpha=0.0,
                     nonselection_fill_color="color",
+                    nonselection_fill_alpha=0.0,
                     nonselection_line_color="color",
                     nonselection_line_alpha=0.6,)
 
@@ -161,13 +162,14 @@ def create_map(s):
     m.circle(x="es", y="ns", color="color", size="size", source=s, line_color="white",
                     alpha=0.6,
                     # set visual properties for selected glyphs
-                    selection_color="color",
+                    selection_fill_color="color",
+                    selection_fill_alpha=0.6,
                     selection_line_color="white",
                     selection_line_alpha=0.6,
 
                     # set visual properties for non-selected glyphs
-                    nonselection_fill_alpha=0.0,
                     nonselection_fill_color="color",
+                    nonselection_fill_alpha=0.0,
                     nonselection_line_color="color",
                     nonselection_line_alpha=0.6,)
 
