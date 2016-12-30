@@ -1,8 +1,7 @@
 import copy
 import pandas as pd
-from bokeh.layouts import row, widgetbox
-from bokeh.models import Jitter
-from bokeh.models import Select, CustomJS, Button
+from bokeh.layouts import row, widgetbox, column
+from bokeh.models import Select, CustomJS, Button, Jitter, DataTable, TableColumn
 from bokeh.palettes import plasma
 from bokeh.plotting import curdoc, figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
@@ -43,13 +42,19 @@ def get_data():
 def create_source():
     df["size"] = 9
     if size.value != 'None':
-        groups = pd.cut(df[size.value].values, len(SIZES))
+        try:
+            groups = pd.qcut(df[size.value].values, len(SIZES))
+        except ValueError:
+            groups = pd.cut(df[size.value].values, len(SIZES))
         df["size"] = [SIZES[xx] for xx in groups.codes]
 
     df["color"] = "#31AADE"
     if color.value != 'None' and color.value in quantileable:
         colors = plasma(default_color_count)
-        groups = pd.cut(df[color.value].values, len(colors))
+        try:
+            groups = pd.qcut(df[color.value].values, len(colors))
+        except ValueError:
+            groups = pd.cut(df[color.value].values, len(colors))
         df["color"] = [colors[xx] for xx in groups.codes]
     elif color.value != 'None' and color.value in discrete_colorable:
         values = df[color.value][pd.notnull(df[color.value])].unique()
@@ -70,13 +75,19 @@ def create_source():
 def update_source(s):
     df["size"] = 9
     if size.value != 'None':
-        groups = pd.cut(df[size.value].values, len(SIZES))
+        try:
+            groups = pd.qcut(df[size.value].values, len(SIZES))
+        except ValueError:
+            groups = pd.cut(df[size.value].values, len(SIZES))
         df["size"] = [SIZES[xx] for xx in groups.codes]
 
     df["color"] = "#31AADE"
     if color.value != 'None' and color.value in quantileable:
         colors = plasma(default_color_count)
-        groups = pd.cut(df[color.value].values, len(colors))
+        try:
+            groups = pd.qcut(df[color.value].values, len(colors))
+        except ValueError:
+            groups = pd.cut(df[color.value].values, len(colors))
         df["color"] = [colors[xx] for xx in groups.codes]
     elif color.value != 'None' and color.value in discrete_colorable:
         values = df[color.value][pd.notnull(df[color.value])].unique()
@@ -110,15 +121,28 @@ def create_crossfilter(s):
     x_title = x.value.title()
     y_title = y.value.title()
 
-    p = figure(plot_height=600, plot_width=800, tools="wheel_zoom, reset, box_select", **kw,
-               title="%s vs %s" % (y_title, x_title))
+    p = figure(plot_height=600, plot_width=800,
+               tools="wheel_zoom, pan, save, reset, box_select, tap",
+               active_drag="box_select", active_scroll="wheel_zoom",
+               title="%s vs %s" % (y_title, x_title),
+               **kw,)
 
     if x.value in discrete:
         p.xaxis.major_label_orientation = pd.np.pi / 4
 
     # plot data on crossfilter
     p.circle(x=x.value, y=y.value, color="color", size="size", source=s, line_color="white",
-             alpha=0.6)
+                    alpha=0.6,
+                    # set visual properties for selected glyphs
+                    selection_color="color",
+                    selection_line_color="white",
+                    selection_line_alpha=0.6,
+
+                    # set visual properties for non-selected glyphs
+                    nonselection_fill_alpha=0.0,
+                    nonselection_fill_color="color",
+                    nonselection_line_color="color",
+                    nonselection_line_alpha=1.0,)
 
     return p
 
@@ -127,15 +151,25 @@ def create_map(s):
     stamen = copy.copy(STAMEN_TERRAIN)
     # create map
     bound = 20000000  # meters
-    m = figure(tools="wheel_zoom, reset, box_select", x_range=(-bound, bound),
-               y_range=(-bound, bound))
+    m = figure(tools="wheel_zoom, pan, reset, box_select, tap",
+               active_drag="box_select", active_scroll="wheel_zoom",
+               x_range=(-bound, bound), y_range=(-bound, bound))
     m.axis.visible = False
     m.add_tile(stamen)
 
     # plot data on world map
     m.circle(x="es", y="ns", color="color", size="size", source=s, line_color="white",
-             alpha=0.6,
-             hover_color='white', hover_alpha=0.5)
+                    alpha=0.6,
+                    # set visual properties for selected glyphs
+                    selection_color="color",
+                    selection_line_color="white",
+                    selection_line_alpha=0.6,
+
+                    # set visual properties for non-selected glyphs
+                    nonselection_fill_alpha=0.0,
+                    nonselection_fill_color="color",
+                    nonselection_line_color="color",
+                    nonselection_line_alpha=1.0,)
 
     return m
 
@@ -172,14 +206,18 @@ def create_jitter_buttons(s):
 
     return map_jitter_button, reset_map_jitter_button
 
+def create_table(cols, s):
+    table_cols = [TableColumn(field=col, title=col) for col in cols]
+    return DataTable(source=s, columns=table_cols, width=1200)
+
 
 # callbacks
 def x_change(attr, old, new):
-    layout.children[1] = create_crossfilter(source)
+    layout.children[0].children[1] = create_crossfilter(source)
 
 
 def y_change(attr, old, new):
-    layout.children[1] = create_crossfilter(source)
+    layout.children[0].children[1] = create_crossfilter(source)
 
 
 def size_change(attr, old, new):
@@ -189,12 +227,15 @@ def size_change(attr, old, new):
 def color_change(attr, old, new):
     update_source(source)
 
+def selection_change(attrname, old, new):
+    selected = source.selected['1d']['indices']
+    table_source.data = table_source.from_df(df.iloc[selected, :])
 
 # load data
 df = get_data()
 
 # catigorize columns
-columns = [c for c in df.columns if c not in ["Lat", "Lng"]]
+columns = [c for c in df.columns]
 discrete = [x for x in columns if df[x].dtype == object]
 discrete_colorable = [x for x in discrete if len(df[x].unique()) <= max(len(df["grp"].unique()),
                                                                         len(df[
@@ -217,6 +258,9 @@ color.on_change('value', color_change)
 
 # initilize source
 source = create_source()
+source.on_change('selected', selection_change)
+
+table_source = ColumnDataSource(df)
 
 # initialize plots
 crossfilter = create_crossfilter(source)
@@ -225,7 +269,8 @@ map = create_map(source)
 # create layout
 crossfilter_controls = widgetbox([x, y, color, size], width=200)
 map_controls = widgetbox([*create_jitter_buttons(source)], width=200)
-layout = row(crossfilter_controls, crossfilter, map, map_controls)
+table = widgetbox(create_table([col for col in columns if ("LD" not in col) and (col not in ["northing", "easting"])], table_source))
+layout = column(row(crossfilter_controls, crossfilter, map, map_controls), table)
 
 curdoc().add_root(layout)
 curdoc().title = "Crossfilter"
