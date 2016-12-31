@@ -2,8 +2,8 @@
 
 if ! [ -e "data/webapp_data.csv" ] && [ -e "data/location.csv" ] && [ -e "data/dapc.rds" ]
 then
-    Rscript R/extractData.R
-    python python/dataprep.py
+    Rscript scripts/extractData.R
+    python scripts/dataprep.py
 fi
 
 if [ -e "data/webapp_data.csv" ]

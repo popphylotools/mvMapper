@@ -11,10 +11,9 @@ ENV APP_PORT 5006
 EXPOSE 5006
 WORKDIR /bokeh
 
-COPY dapc_webapp /bokeh/dapc_webapp
+COPY scripts /bokeh/scripts
 COPY data /bokeh/data
-COPY R /bokeh/R
-COPY python /bokeh/python
+COPY dapc_webapp /bokeh/dapc_webapp
 
 VOLUME ["/bokeh/data"]
 
