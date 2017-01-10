@@ -1,6 +1,6 @@
-dapc_mappR
+dapcmapper
 ===========
-This webapp serves as an interactive data exploration tool for population genetic data analyzed with discriminant analysis of principal components (DAPC) in the R library adegenet. This webapp also requires associated location information and supports additional metadata. It displays a scatterplot with selecters for x-axis, y-axis, point color, and point size, in addition to a worldmap with optional point jitter. Data selections are linked across the two plots, and a data table below shows details of the selected data.
+This webapp serves as an interactive data exploration tool for population genetic data analyzed with discriminant analysis of principal components (DAPC) in the R library adegenet. This webapp also requires associated location information and supports additional metadata. It displays a scatterplot with selectors for x-axis, y-axis, point color, and point size, in addition to a worldmap with optional point jitter. Data selections are linked across the two plots, and a data table below shows details of the selected data.
 
 Preparing data
 ---------------
@@ -12,14 +12,16 @@ You must then create a location.csv file that, at minimum, includes a `key` colu
 
 you can include additional columns of information which will be ingested and displayed within the webapp (e.g. host, sex, morphological characteristics, etc.).
 
-Running in Docker
+Running dapcmapper in [Docker](https://www.docker.com/)
 ----------------
-Run with sample data (see below):
+Run with example data (see below):
 ```
 docker run -d -p 5006:5006 woods26/dapc_webapp
 ```
+Then just open a web browser, and navigate to `localhost:5006`
 
-Run with dapc.rds and location.csv in <absolute_path_to_local_data_dir>
+
+Run with dapc.rds and location.csv in <absolute_path_to_local_data_dir> for your own data
 ```
 docker run -d -p 5006:5006 -v <absolute_path_to_local_data_dir>:/bokeh/data woods26/dapc_webapp
 ```
