@@ -1,7 +1,7 @@
 import copy
 import pandas as pd
 from bokeh.layouts import row, widgetbox, layout
-from bokeh.models import Select, CustomJS, Button, Jitter, DataTable, TableColumn
+from bokeh.models import Select, CustomJS, Jitter, DataTable, TableColumn, Slider
 from bokeh.palettes import plasma
 from bokeh.plotting import curdoc, figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
@@ -11,8 +11,12 @@ default_color_count = 11
 SIZES = list(range(6, 22, 3))
 
 
+##################
+# data handeling #
+##################
 
 def get_data():
+    """Read data from csv and transform map coordinates. """
     data = pd.read_csv("../data/webapp_data.csv")
 
     data['grp'] = data['grp'].apply(str)
@@ -32,7 +36,7 @@ def get_data():
         *data.loc[pd.notnull(data["Lng"]) & pd.notnull(data["Lat"])].apply(
             lambda x: pyproj.transform(wgs84, webMer, x["Lng"], x["Lat"]), axis=1))
 
-    # show unknown locations on map in arctic
+    # show unknown locations on map in antartic
     data.northing = data.northing.apply(lambda x: -15000000 if pd.isnull(x) else x)
     data.easting = data.easting.apply(lambda x: 0 if pd.isnull(x) else x)
 
@@ -40,6 +44,7 @@ def get_data():
 
 
 def create_source():
+    """Return new ColumnDataSource."""
     df["size"] = 9
     if size.value != 'None':
         try:
@@ -73,6 +78,7 @@ def create_source():
 
 
 def update_source(s):
+    """Update `size` and `color` columns of ColumnDataSource 's' to reflect """
     df["size"] = 9
     if size.value != 'None':
         try:
@@ -98,11 +104,16 @@ def update_source(s):
         groups = [codes[val] for val in df[color.value].values]
         df["color"] = [colors[xx] for xx in groups]
 
+
     # create a ColumnDataSource from the  data set
     s.data.update({"size":df["size"], "color":df["color"]})
 
+#######################
+# Data Visualizations #
+#######################
 
 def create_crossfilter(s):
+    """Return a crossfilter plot linked to ColumnDataSource s"""
     kw = dict()
     if x.value in discrete:
         values = df[x.value][pd.notnull(df[x.value])].unique()
@@ -139,8 +150,8 @@ def create_crossfilter(s):
                     selection_line_alpha=0.6,
 
                     # set visual properties for non-selected glyphs
-                    nonselection_fill_color="black",
-                    nonselection_fill_alpha=0.01,
+                    nonselection_fill_color="white",
+                    nonselection_fill_alpha=0.1,
                     nonselection_line_color="color",
                     nonselection_line_alpha=0.6,)
 
@@ -148,6 +159,7 @@ def create_crossfilter(s):
 
 
 def create_map(s):
+    """Return map linked to ColumnDataSource 's'."""
     stamen = copy.copy(STAMEN_TERRAIN)
     # create map
     bound = 20000000  # meters
@@ -177,62 +189,63 @@ def create_map(s):
 
 
 def create_table(cols, s):
+    """Return table linked to ColumnDataSource 's'."""
     table_cols = [TableColumn(field=col, title=col) for col in cols]
     return DataTable(source=s, columns=table_cols, width=1600, height=250, fit_columns=False, )
 
+#############
+# callbacks #
+#############
 
-def create_jitter_buttons(s):
-    map_jitter = Jitter(width=16093, distribution="normal")
-
-    jitter_callback = CustomJS(args=dict(source=s, map_jitter=map_jitter), code="""
-        var data = source.data;
-        for (var i = 0; i < data['easting'].length; i++) {
-            data['es'][i] = map_jitter.compute(data['es'][i]);
-        }
-        for (var i = 0; i < data['northing'].length; i++) {
-            data['ns'][i] = map_jitter.compute(data['ns'][i]);
-        }
-        source.trigger('change');
-    """)
-
-    reset_jitter_callback = CustomJS(args=dict(source=s, map_jitter=map_jitter), code="""
-        var data = source.data;
-        for (var i = 0; i < data['easting'].length; i++) {
-            data['es'][i] = data['easting'][i];
-        }
-        for (var i = 0; i < data['northing'].length; i++) {
-            data['ns'][i] = data['northing'][i];
-        }
-        source.trigger('change');
-    """)
-
-    map_jitter_button = Button(label='apply jitter to map', callback=jitter_callback)
-
-    reset_map_jitter_button = Button(label='remove jitter from map',
-                                     callback=reset_jitter_callback)
-
-    return map_jitter_button, reset_map_jitter_button
-
-
-# callbacks
 def x_change(attr, old, new):
+    """Replece crossfilter plot."""
     l.children[0].children[1] = create_crossfilter(source)
-
 
 def y_change(attr, old, new):
+    """Replece crossfilter plot."""
     l.children[0].children[1] = create_crossfilter(source)
 
-
 def size_change(attr, old, new):
+    """Update ColumnDataSource 'source'."""
     update_source(source)
 
-
 def color_change(attr, old, new):
+    """Update ColumnDataSource 'source'."""
     update_source(source)
 
 def selection_change(attrname, old, new):
+    """Update ColumnDataSource 'table_source' with selection found in 'source'."""
     selected = source.selected['1d']['indices']
     table_source.data = table_source.from_df(df.iloc[selected, :])
+
+# javascript callback
+jitter_callback = CustomJS(args=dict(map_jitter=Jitter()), code="""
+        var data = source.data;
+        if (slider.value == 0) {
+            for (var i = 0; i < data['easting'].length; i++) {
+                data['es'][i] = data['easting'][i];
+            }
+            for (var i = 0; i < data['northing'].length; i++) {
+                data['ns'][i] = data['northing'][i];
+            }
+        }
+
+        else {
+            map_jitter.distribution = dist.value
+            map_jitter.width = slider.value * 1000
+            for (var i = 0; i < data['easting'].length; i++) {
+                data['es'][i] = map_jitter.compute(data['easting'][i]);
+            }
+            for (var i = 0; i < data['northing'].length; i++) {
+                data['ns'][i] = map_jitter.compute(data['northing'][i]);
+            }
+        }
+        source.trigger('change');
+    """)
+
+########
+# Main #
+########
 
 # load data
 df = get_data()
@@ -241,8 +254,7 @@ df = get_data()
 columns = [c for c in df.columns]
 discrete = [x for x in columns if df[x].dtype == object]
 discrete_colorable = [x for x in discrete if len(df[x].unique()) <= max(len(df["grp"].unique()),
-                                                                        len(df[
-                                                                                "assign"].unique()))]
+                                                                        len(df["assign"].unique()))]
 continuous = [x for x in columns if x not in discrete]
 quantileable = [x for x in continuous if len(df[x].unique()) > 20]
 
@@ -259,24 +271,35 @@ size.on_change('value', size_change)
 color = Select(title='Color', value='assign', options=['None'] + quantileable + discrete_colorable)
 color.on_change('value', color_change)
 
-# initilize source
+# initilize sources
 source = create_source()
 source.on_change('selected', selection_change)
-
 table_source = ColumnDataSource(df)
+
+jitter_selector = Select(title="Map Jitter Distribution:", value="uniform",
+                      options=["uniform", "normal"], callback=jitter_callback)
+
+jitter_slider = Slider(start=0, end=1000, value=0, step=10,
+                           title="Map Jitter Width (Km):", callback=jitter_callback)
+
+
+jitter_callback.args["source"] = source
+jitter_callback.args["slider"] = jitter_slider
+jitter_callback.args["dist"] = jitter_selector
+
 
 # initialize plots
 crossfilter = create_crossfilter(source)
 map = create_map(source)
 
 # create layout
-controls = widgetbox([x, y, color, size] + [*create_jitter_buttons(source)], width=200)
+controls = widgetbox([x, y, color, size, jitter_selector, jitter_slider], width=200)
 table = widgetbox(create_table([col for col in columns if ("LD" not in col) and (col not in ["northing", "easting"])], table_source))
 l = layout([
     [controls, crossfilter, map],
     [row(table)]
 ])
 
-
+# add layout to document
 curdoc().add_root(l)
 curdoc().title = "Crossfilter"
