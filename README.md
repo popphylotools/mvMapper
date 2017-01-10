@@ -21,6 +21,7 @@ docker run -d -p 5006:5006 woods26/dapc_webapp
 Then just open a web browser, and navigate to `localhost:5006`
 
 
+
 Run with dapc.rds and location.csv in <absolute_path_to_local_data_dir> for your own data
 ```
 docker run -d -p 5006:5006 -v <absolute_path_to_local_data_dir>:/bokeh/data woods26/dapc_webapp
