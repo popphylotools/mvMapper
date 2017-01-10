@@ -1,25 +1,25 @@
-dapc_webapp
+dapc_mappR
 ===========
-This webapp serves as an interactive data exploration tool for popgen data analized with the dapc function of the R library Adegenet. This webapp also requires associated location information and supports additional metadata. It displays a scatterplot with selecters for z-axis, y-axis, point color, and point size, in addition to a worldmap. Data selections are linked across the two plots, and a data table below shows details of the selected data.
+This webapp serves as an interactive data exploration tool for population genetic data analyzed with discriminant analysis of principal components (DAPC) in the R library adegenet. This webapp also requires associated location information and supports additional metadata. It displays a scatterplot with selecters for x-axis, y-axis, point color, and point size, in addition to a worldmap with optional point jitter. Data selections are linked across the two plots, and a data table below shows details of the selected data.
 
-Prepairing data
+Preparing data
 ---------------
-This webapp is designed to consume data created with the R library Adegenet. The particulars of this process go beond the scope of this document, however a tutorial is avalible [here](adegenet.r-forge.r-project.org/files/tutorial-dapc.pdf)
+This webapp is designed to consume a DAPC data object created with the R library adegenet. The particulars of this process go beyond the scope of this document, however a tutorial is avalible [here](adegenet.r-forge.r-project.org/files/tutorial-dapc.pdf)
 
-Once you have run the dapc analisis and have a dapc object in R, say `dapc1`, you can save it by running `saveRDS(dapc1, file="dapc.rds")`
+Once you have run the DAPC and have an active DAPC object in R, for example called `dapc1` in following the DAPC tutorial, you can save it by running `saveRDS(dapc1, file="dapc.rds")`
 
-You must then create a location.csv file which, at minimum, includes a `key` column matching the keys used in the input for the dapc analisis, as well as `Lat` and `Lng` columns containing the decimal coordinates assosiated with that sample.
+You must then create a location.csv file that, at minimum, includes a `key` column matching the keys (individual identifiers) used in the input for the DAPC, as well as `Lat` and `Lng` columns containing the decimal coordinates associated with each sample.
 
-you can include additional columns of information which will be ingested and displayed within the webapp.
+you can include additional columns of information which will be ingested and displayed within the webapp (e.g. host, sex, morphological characteristics, etc.).
 
-Runing in Docker
+Running in Docker
 ----------------
-Run with sample data:
+Run with sample data (see below):
 ```
 docker run -d -p 5006:5006 woods26/dapc_webapp
 ```
 
-Run with daps.rds and location.csv in <absolute_path_to_local_data_dir>
+Run with dapc.rds and location.csv in <absolute_path_to_local_data_dir>
 ```
 docker run -d -p 5006:5006 -v <absolute_path_to_local_data_dir>:/bokeh/data woods26/dapc_webapp
 ```
