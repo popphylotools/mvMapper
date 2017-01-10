@@ -4,7 +4,7 @@ This webapp serves as an interactive data exploration tool for population geneti
 
 Preparing data
 ---------------
-This webapp is designed to consume a DAPC data object created with the R library adegenet. The particulars of this process go beyond the scope of this document, however a tutorial is avalible [here](adegenet.r-forge.r-project.org/files/tutorial-dapc.pdf)
+This webapp is designed to consume a DAPC data object created with the R library adegenet. The particulars of this process go beyond the scope of this document, however a tutorial is available [here](adegenet.r-forge.r-project.org/files/tutorial-dapc.pdf)
 
 Once you have run the DAPC and have an active DAPC object in R, for example called `dapc1` in following the DAPC tutorial, you can save it by running `saveRDS(dapc1, file="dapc.rds")`
 
