@@ -17,7 +17,7 @@ SIZES = list(range(6, 22, 3))
 
 def get_data():
     """Read data from csv and transform map coordinates. """
-    data = pd.read_csv(r"../data/webapp_data.csv")
+    data = pd.read_csv("/data/webapp_data.csv")
 
     data['grp'] = data['grp'].apply(str)
     data['assign'] = data['assign'].apply(str)
@@ -336,14 +336,11 @@ jitter_slider = Slider(start=0, end=1000, value=0, step=10,
 
 download_button = Button(label="Download", button_type="success", callback=download_callback)
 
-
 jitter_callback.args["source"] = source
 jitter_callback.args["slider"] = jitter_slider
 jitter_callback.args["dist"] = jitter_selector
 
-download_button.args["table_source"] = table_source
-download_button.args["columns"] = df.columns
-
+download_callback.args["table_source"] = table_source
 
 # initialize plots
 crossfilter = create_crossfilter(source)
