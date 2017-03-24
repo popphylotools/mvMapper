@@ -18,7 +18,7 @@ SIZES = list(range(6, 22, 3))
 
 def get_data():
     """Read data from csv and transform map coordinates. """
-    print(os.path.getcwd())
+    print(os.getcwd())
     data = pd.read_csv("/data/webapp_data.csv")
 
     data['grp'] = data['grp'].apply(str)
