@@ -1,11 +1,13 @@
 import copy
 import pandas as pd
 from bokeh.layouts import row, widgetbox, layout
-from bokeh.models import Select, CustomJS, Jitter, DataTable, TableColumn, Slider
+from bokeh.models import Select, CustomJS, Jitter, DataTable, TableColumn, Slider, Button
 from bokeh.palettes import plasma
 from bokeh.plotting import curdoc, figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
 import pyproj
+import os
+import json
 
 default_color_count = 11
 SIZES = list(range(6, 22, 3))
@@ -17,7 +19,7 @@ SIZES = list(range(6, 22, 3))
 
 def get_data():
     """Read data from csv and transform map coordinates. """
-    data = pd.read_csv("../data/webapp_data.csv")
+    data = pd.read_csv("data/webapp_data.csv")
 
     data['grp'] = data['grp'].apply(str)
     data['assign'] = data['assign'].apply(str)
@@ -218,31 +220,6 @@ def selection_change(attrname, old, new):
     selected = source.selected['1d']['indices']
     table_source.data = table_source.from_df(df.iloc[selected, :])
 
-# javascript callback
-jitter_callback = CustomJS(args=dict(map_jitter=Jitter()), code="""
-        var data = source.data;
-        if (slider.value == 0) {
-            for (var i = 0; i < data['easting'].length; i++) {
-                data['es'][i] = data['easting'][i];
-            }
-            for (var i = 0; i < data['northing'].length; i++) {
-                data['ns'][i] = data['northing'][i];
-            }
-        }
-
-        else {
-            map_jitter.distribution = dist.value
-            map_jitter.width = slider.value * 1000
-            for (var i = 0; i < data['easting'].length; i++) {
-                data['es'][i] = map_jitter.compute(data['easting'][i]);
-            }
-            for (var i = 0; i < data['northing'].length; i++) {
-                data['ns'][i] = map_jitter.compute(data['northing'][i]);
-            }
-        }
-        source.trigger('change');
-    """)
-
 ########
 # Main #
 ########
@@ -271,10 +248,91 @@ size.on_change('value', size_change)
 color = Select(title='Color', value='assign', options=['None'] + quantileable + discrete_colorable)
 color.on_change('value', color_change)
 
-# initilize sources
+#####################
+# initialize sources #
+#####################
+
 source = create_source()
 source.on_change('selected', selection_change)
 table_source = ColumnDataSource(df)
+
+########################
+# javascript callbacks #
+########################
+
+download_callback = CustomJS(args=dict(table_source=table_source), code=r"""
+        var data = table_source.data;
+        var columns = %s;
+        var n = columns.length;
+        var m = data[columns[0]].length;
+
+        var csvLines = [];
+
+        var currRow = [];
+        for (j=0; j<n; j++) {
+            currRow.push("\"" + columns[j].toString() + "\"");
+        }
+
+        csvLines.push(currRow.join(","));
+
+        for (i=0; i < m; i++) {
+            var currRow = [];
+            for (j=0; j<n; j++) {
+                if (typeof(data[columns[j]][i]) == 'string') {
+                    currRow.push("\"" + data[columns[j]][i].toString() + "\"");
+                } else {
+                    currRow.push(data[columns[j]][i].toString());
+                }
+            }
+            csvLines.push(currRow.join(","));
+        }
+
+        var filetext = csvLines.join("\n");
+
+        var filename = 'data_result.csv';
+        var blob = new Blob([filetext], { type: 'text/csv;charset=utf-8;' });
+
+        //addresses IE
+        if (navigator.msSaveBlob) {
+            navigator.msSaveBlob(blob, filename);
+        }
+
+        else {
+            var link = document.createElement("a");
+            link = document.createElement('a')
+            link.href = URL.createObjectURL(blob);
+            link.download = filename
+            link.target = "_blank";
+            link.style.visibility = 'hidden';
+            link.dispatchEvent(new MouseEvent('click'))
+        }
+    """ % json.dumps([x for x in columns if x not in {"easting", "northing"}]))
+
+jitter_callback = CustomJS(args=dict(source=source, map_jitter=Jitter()), code=r"""
+        var data = source.data;
+        if (slider.value == 0) {
+            for (var i = 0; i < data['easting'].length; i++) {
+                data['es'][i] = data['easting'][i];
+            }
+            for (var i = 0; i < data['northing'].length; i++) {
+                data['ns'][i] = data['northing'][i];
+            }
+        }
+
+        else {
+            map_jitter.distribution = dist.value
+            map_jitter.width = slider.value * 1000
+            for (var i = 0; i < data['easting'].length; i++) {
+                data['es'][i] = map_jitter.compute(data['easting'][i]);
+            }
+            for (var i = 0; i < data['northing'].length; i++) {
+                data['ns'][i] = map_jitter.compute(data['northing'][i]);
+            }
+        }
+        source.trigger('change');
+    """)
+
+download_button = Button(label="Download", button_type="success", callback=download_callback)
 
 jitter_selector = Select(title="Map Jitter Distribution:", value="uniform",
                       options=["uniform", "normal"], callback=jitter_callback)
@@ -282,18 +340,15 @@ jitter_selector = Select(title="Map Jitter Distribution:", value="uniform",
 jitter_slider = Slider(start=0, end=1000, value=0, step=10,
                            title="Map Jitter Width (Km):", callback=jitter_callback)
 
-
-jitter_callback.args["source"] = source
-jitter_callback.args["slider"] = jitter_slider
 jitter_callback.args["dist"] = jitter_selector
-
+jitter_callback.args["slider"] = jitter_slider
 
 # initialize plots
 crossfilter = create_crossfilter(source)
 map = create_map(source)
 
 # create layout
-controls = widgetbox([x, y, color, size, jitter_selector, jitter_slider], width=200)
+controls = widgetbox([x, y, color, size, jitter_selector, jitter_slider, download_button], width=200)
 table = widgetbox(create_table([col for col in columns if ("LD" not in col) and (col not in ["northing", "easting"])], table_source))
 l = layout([
     [controls, crossfilter, map],
