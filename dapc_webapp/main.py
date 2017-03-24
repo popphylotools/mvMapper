@@ -14,16 +14,17 @@ SIZES = list(range(6, 22, 3))
 
 
 ##################
-# data handeling #
+# data handling #
 ##################
 
 def get_data():
     """Read data from csv and transform map coordinates. """
     data = pd.read_csv("data/webapp_data.csv")
 
-    data['grp'] = data['grp'].apply(str)
-    data['assign'] = data['assign'].apply(str)
-
+    if 'grp' in data.columns:
+        data['grp'] = data['grp'].apply(str)
+    if 'assign' in data.columns:
+        data['assign'] = data['assign'].apply(str)
 
     data = data.applymap(lambda x: "NaN" if pd.isnull(x) else x)
 
@@ -228,24 +229,41 @@ def selection_change(attrname, old, new):
 df = get_data()
 
 # catigorize columns
-columns = [c for c in df.columns]
+columns = [c for c in df.columns if c not in {"easting", "northing"}]
 discrete = [x for x in columns if df[x].dtype == object]
-discrete_colorable = [x for x in discrete if len(df[x].unique()) <= max(len(df["grp"].unique()),
-                                                                        len(df["assign"].unique()))]
 continuous = [x for x in columns if x not in discrete]
 quantileable = [x for x in continuous if len(df[x].unique()) > 20]
+if ("grp" in columns) and ("assign" in columns):
+    discrete_colorable = [x for x in discrete if len(df[x].unique()) <= max(len(df["grp"].unique()),
+                                                                            len(df["assign"].unique()))]
+else:
+    discrete_colorable = [x for x in discrete if len(df[x].unique()) <= default_color_count]
 
 # create widgets
-x = Select(title='X-Axis', value='LD1', options=columns)
+if 'LD1' in columns:
+    x = Select(title='X-Axis', value='LD1', options=columns)
+else:
+    x = Select(title='X-Axis', value=columns[0], options=columns)
 x.on_change('value', x_change)
 
-y = Select(title='Y-Axis', value='LD2', options=columns)
+
+if 'LD2' in columns:
+    y = Select(title='Y-Axis', value='LD2', options=columns)
+else:
+    y = Select(title='Y-Axis', value=columns[1], options=columns)
 y.on_change('value', y_change)
 
-size = Select(title='Size', value='posterior_assign', options=['None'] + quantileable)
+
+if 'LD2' in columns:
+    size = Select(title='Size', value='posterior_assign', options=['None'] + quantileable)
+else:
+    size = Select(title='Size', value='None', options=['None'] + quantileable)
 size.on_change('value', size_change)
 
-color = Select(title='Color', value='assign', options=['None'] + quantileable + discrete_colorable)
+if 'LD2' in columns:
+    color = Select(title='Color', value='assign', options=['None'] + quantileable + discrete_colorable)
+else:
+    color = Select(title='Color', value='None', options=['None'] + quantileable + discrete_colorable)
 color.on_change('value', color_change)
 
 #####################
@@ -306,7 +324,7 @@ download_callback = CustomJS(args=dict(table_source=table_source), code=r"""
             link.style.visibility = 'hidden';
             link.dispatchEvent(new MouseEvent('click'))
         }
-    """ % json.dumps([x for x in columns if x not in {"easting", "northing"}]))
+    """ % json.dumps(columns))
 
 jitter_callback = CustomJS(args=dict(source=source, map_jitter=Jitter()), code=r"""
         var data = source.data;
@@ -332,7 +350,7 @@ jitter_callback = CustomJS(args=dict(source=source, map_jitter=Jitter()), code=r
         source.trigger('change');
     """)
 
-download_button = Button(label="Download", button_type="success", callback=download_callback)
+download_button = Button(label="Download Selected", button_type="success", callback=download_callback)
 
 jitter_selector = Select(title="Map Jitter Distribution:", value="uniform",
                       options=["uniform", "normal"], callback=jitter_callback)
@@ -349,7 +367,7 @@ map = create_map(source)
 
 # create layout
 controls = widgetbox([x, y, color, size, jitter_selector, jitter_slider, download_button], width=200)
-table = widgetbox(create_table([col for col in columns if ("LD" not in col) and (col not in ["northing", "easting"])], table_source))
+table = widgetbox(create_table([col for col in columns if ("LD" not in col)], table_source))
 l = layout([
     [controls, crossfilter, map],
     [row(table)]
