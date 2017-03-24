@@ -7,6 +7,7 @@ from bokeh.plotting import curdoc, figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
 import pyproj
 import os
+import json
 
 default_color_count = 11
 SIZES = list(range(6, 22, 3))
@@ -18,8 +19,7 @@ SIZES = list(range(6, 22, 3))
 
 def get_data():
     """Read data from csv and transform map coordinates. """
-    print(os.getcwd())
-    data = pd.read_csv("/data/webapp_data.csv")
+    data = pd.read_csv("data/webapp_data.csv")
 
     data['grp'] = data['grp'].apply(str)
     data['assign'] = data['assign'].apply(str)
@@ -220,38 +220,49 @@ def selection_change(attrname, old, new):
     selected = source.selected['1d']['indices']
     table_source.data = table_source.from_df(df.iloc[selected, :])
 
+########
+# Main #
+########
+
+# load data
+df = get_data()
+
+# catigorize columns
+columns = [c for c in df.columns]
+discrete = [x for x in columns if df[x].dtype == object]
+discrete_colorable = [x for x in discrete if len(df[x].unique()) <= max(len(df["grp"].unique()),
+                                                                        len(df["assign"].unique()))]
+continuous = [x for x in columns if x not in discrete]
+quantileable = [x for x in continuous if len(df[x].unique()) > 20]
+
+# create widgets
+x = Select(title='X-Axis', value='LD1', options=columns)
+x.on_change('value', x_change)
+
+y = Select(title='Y-Axis', value='LD2', options=columns)
+y.on_change('value', y_change)
+
+size = Select(title='Size', value='posterior_assign', options=['None'] + quantileable)
+size.on_change('value', size_change)
+
+color = Select(title='Color', value='assign', options=['None'] + quantileable + discrete_colorable)
+color.on_change('value', color_change)
+
+#####################
+# initialize sources #
+#####################
+
+source = create_source()
+source.on_change('selected', selection_change)
+table_source = ColumnDataSource(df)
+
 ########################
 # javascript callbacks #
 ########################
 
-jitter_callback = CustomJS(args=dict(map_jitter=Jitter()), code="""
-        var data = source.data;
-        if (slider.value == 0) {
-            for (var i = 0; i < data['easting'].length; i++) {
-                data['es'][i] = data['easting'][i];
-            }
-            for (var i = 0; i < data['northing'].length; i++) {
-                data['ns'][i] = data['northing'][i];
-            }
-        }
-
-        else {
-            map_jitter.distribution = dist.value
-            map_jitter.width = slider.value * 1000
-            for (var i = 0; i < data['easting'].length; i++) {
-                data['es'][i] = map_jitter.compute(data['easting'][i]);
-            }
-            for (var i = 0; i < data['northing'].length; i++) {
-                data['ns'][i] = map_jitter.compute(data['northing'][i]);
-            }
-        }
-        source.trigger('change');
-    """)
-
-download_callback = CustomJS(code="""
+download_callback = CustomJS(args=dict(table_source=table_source), code=r"""
         var data = table_source.data;
-        var columns = Object.keys(data);
-
+        var columns = %s;
         var n = columns.length;
         var m = data[columns[0]].length;
 
@@ -295,40 +306,33 @@ download_callback = CustomJS(code="""
             link.style.visibility = 'hidden';
             link.dispatchEvent(new MouseEvent('click'))
         }
+    """ % json.dumps([x for x in columns if x not in {"easting", "northing"}]))
+
+jitter_callback = CustomJS(args=dict(source=source, map_jitter=Jitter()), code=r"""
+        var data = source.data;
+        if (slider.value == 0) {
+            for (var i = 0; i < data['easting'].length; i++) {
+                data['es'][i] = data['easting'][i];
+            }
+            for (var i = 0; i < data['northing'].length; i++) {
+                data['ns'][i] = data['northing'][i];
+            }
+        }
+
+        else {
+            map_jitter.distribution = dist.value
+            map_jitter.width = slider.value * 1000
+            for (var i = 0; i < data['easting'].length; i++) {
+                data['es'][i] = map_jitter.compute(data['easting'][i]);
+            }
+            for (var i = 0; i < data['northing'].length; i++) {
+                data['ns'][i] = map_jitter.compute(data['northing'][i]);
+            }
+        }
+        source.trigger('change');
     """)
 
-########
-# Main #
-########
-
-# load data
-df = get_data()
-
-# catigorize columns
-columns = [c for c in df.columns]
-discrete = [x for x in columns if df[x].dtype == object]
-discrete_colorable = [x for x in discrete if len(df[x].unique()) <= max(len(df["grp"].unique()),
-                                                                        len(df["assign"].unique()))]
-continuous = [x for x in columns if x not in discrete]
-quantileable = [x for x in continuous if len(df[x].unique()) > 20]
-
-# create widgets
-x = Select(title='X-Axis', value='LD1', options=columns)
-x.on_change('value', x_change)
-
-y = Select(title='Y-Axis', value='LD2', options=columns)
-y.on_change('value', y_change)
-
-size = Select(title='Size', value='posterior_assign', options=['None'] + quantileable)
-size.on_change('value', size_change)
-
-color = Select(title='Color', value='assign', options=['None'] + quantileable + discrete_colorable)
-color.on_change('value', color_change)
-
-# initilize sources
-source = create_source()
-source.on_change('selected', selection_change)
-table_source = ColumnDataSource(df)
+download_button = Button(label="Download", button_type="success", callback=download_callback)
 
 jitter_selector = Select(title="Map Jitter Distribution:", value="uniform",
                       options=["uniform", "normal"], callback=jitter_callback)
@@ -336,13 +340,8 @@ jitter_selector = Select(title="Map Jitter Distribution:", value="uniform",
 jitter_slider = Slider(start=0, end=1000, value=0, step=10,
                            title="Map Jitter Width (Km):", callback=jitter_callback)
 
-download_button = Button(label="Download", button_type="success", callback=download_callback)
-
-jitter_callback.args["source"] = source
-jitter_callback.args["slider"] = jitter_slider
 jitter_callback.args["dist"] = jitter_selector
-
-download_callback.args["table_source"] = table_source
+jitter_callback.args["slider"] = jitter_slider
 
 # initialize plots
 crossfilter = create_crossfilter(source)
