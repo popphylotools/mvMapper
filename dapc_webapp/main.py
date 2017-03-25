@@ -2,15 +2,21 @@ import copy
 import pandas as pd
 from bokeh.layouts import row, widgetbox, layout
 from bokeh.models import Select, CustomJS, Jitter, DataTable, TableColumn, Slider, Button
-from bokeh.palettes import plasma
+from bokeh.palettes import linear_palette
 from bokeh.plotting import curdoc, figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
+import colorcet as cc
 import pyproj
 import os
 import json
 
 default_color_count = 11
 SIZES = list(range(6, 22, 3))
+
+# define available palettes
+palettes = {k:v for k,v in cc.palette.items() if "_" not in k}
+# palettes = {"rainbow": cc.rainbow,
+#             "inferno": cc.inferno}
 
 
 ##################
@@ -58,7 +64,7 @@ def create_source():
 
     df["color"] = "#31AADE"
     if color.value != 'None' and color.value in quantileable:
-        colors = plasma(default_color_count)
+        colors = linear_palette(palettes[palette.value], default_color_count)
         try:
             groups = pd.qcut(df[color.value].values, len(colors))
         except ValueError:
@@ -66,7 +72,7 @@ def create_source():
         df["color"] = [colors[xx] for xx in groups.codes]
     elif color.value != 'None' and color.value in discrete_colorable:
         values = df[color.value][pd.notnull(df[color.value])].unique()
-        colors = plasma(len(values))
+        colors = linear_palette(palettes[palette.value], len(values))
         if all([val.isnumeric() for val in values]):
             values = sorted(values, key=lambda x: float(x))
         codes = dict(zip(values, range(len(values))))
@@ -92,7 +98,7 @@ def update_source(s):
 
     df["color"] = "#31AADE"
     if color.value != 'None' and color.value in quantileable:
-        colors = plasma(default_color_count)
+        colors = linear_palette(palettes[palette.value], default_color_count)
         try:
             groups = pd.qcut(df[color.value].values, len(colors))
         except ValueError:
@@ -100,7 +106,7 @@ def update_source(s):
         df["color"] = [colors[xx] for xx in groups.codes]
     elif color.value != 'None' and color.value in discrete_colorable:
         values = df[color.value][pd.notnull(df[color.value])].unique()
-        colors = plasma(len(values))
+        colors = linear_palette(palettes[palette.value], len(values))
         if all([val.isnumeric() for val in values]):
             values = sorted(values, key=lambda x: float(x))
         codes = dict(zip(values, range(len(values))))
@@ -221,6 +227,10 @@ def selection_change(attrname, old, new):
     selected = source.selected['1d']['indices']
     table_source.data = table_source.from_df(df.iloc[selected, :])
 
+def palette_change(attr, old, new):
+    """Update ColumnDataSource 'source'."""
+    update_source(source)
+
 ########
 # Main #
 ########
@@ -265,6 +275,9 @@ if 'LD2' in columns:
 else:
     color = Select(title='Color', value='None', options=['None'] + quantileable + discrete_colorable)
 color.on_change('value', color_change)
+
+palette = Select(title='Palette', value="inferno", options=[k for k in palettes.keys()])
+palette.on_change('value', palette_change)
 
 #####################
 # initialize sources #
@@ -366,7 +379,7 @@ crossfilter = create_crossfilter(source)
 map = create_map(source)
 
 # create layout
-controls = widgetbox([x, y, color, size, jitter_selector, jitter_slider, download_button], width=200)
+controls = widgetbox([x, y, color, size, palette, jitter_selector, jitter_slider, download_button], width=200)
 table = widgetbox(create_table([col for col in columns if ("LD" not in col)], table_source))
 l = layout([
     [controls, crossfilter, map],
