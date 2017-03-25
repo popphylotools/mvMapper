@@ -14,9 +14,9 @@ default_color_count = 11
 SIZES = list(range(6, 22, 3))
 
 # define available palettes
-palettes = {k:v for k,v in cc.palette.items() if "_" not in k}
-# palettes = {"rainbow": cc.rainbow,
-#             "inferno": cc.inferno}
+palettes = {k:v for k,v in cc.palette.items() if
+            ("_" not in k and
+             k not in ["bkr", "coolwarm", "bjy", "bky", "gwv"])}
 
 
 ##################
@@ -330,12 +330,12 @@ download_callback = CustomJS(args=dict(table_source=table_source), code=r"""
 
         else {
             var link = document.createElement("a");
-            link = document.createElement('a')
+            link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = filename
+            link.download = filename;
             link.target = "_blank";
             link.style.visibility = 'hidden';
-            link.dispatchEvent(new MouseEvent('click'))
+            link.dispatchEvent(new MouseEvent('click'));
         }
     """ % json.dumps(columns))
 
@@ -379,7 +379,7 @@ crossfilter = create_crossfilter(source)
 map = create_map(source)
 
 # create layout
-controls = widgetbox([x, y, color, size, palette, jitter_selector, jitter_slider, download_button], width=200)
+controls = widgetbox([x, y, color, palette, size, jitter_selector, jitter_slider, download_button], width=200)
 table = widgetbox(create_table([col for col in columns if ("LD" not in col)], table_source))
 l = layout([
     [controls, crossfilter, map],
