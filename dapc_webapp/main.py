@@ -2,19 +2,19 @@ import copy
 import pandas as pd
 from bokeh.layouts import row, widgetbox, layout
 from bokeh.models import Select, CustomJS, Jitter, DataTable, TableColumn, Slider, Button
+# noinspection PyUnresolvedReferences
 from bokeh.palettes import linear_palette
 from bokeh.plotting import curdoc, figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
 import colorcet as cc
 import pyproj
-import os
 import json
 
 default_color_count = 11
 SIZES = list(range(6, 22, 3))
 
 # define available palettes
-palettes = {k:v for k,v in cc.palette.items() if
+palettes = {k: v for k, v in cc.palette.items() if
             ("_" not in k and
              k not in ["bkr", "coolwarm", "bjy", "bky", "gwv"])}
 
@@ -36,20 +36,21 @@ def get_data():
 
     # transform coords to map projection
     wgs84 = pyproj.Proj(init="epsg:4326")
-    webMer = pyproj.Proj(init="epsg:3857")
+    web_mer = pyproj.Proj(init="epsg:3857")
     data["easting"] = "NaN"
     data["northing"] = "NaN"
     data["easting"] = data["easting"].astype("float64")
     data["northing"] = data["northing"].astype("float64")
     data.loc[pd.notnull(data["Lng"]), "easting"], data.loc[pd.notnull(data["Lat"]), "northing"] = zip(
         *data.loc[pd.notnull(data["Lng"]) & pd.notnull(data["Lat"])].apply(
-            lambda x: pyproj.transform(wgs84, webMer, x["Lng"], x["Lat"]), axis=1))
+            lambda x: pyproj.transform(wgs84, web_mer, x["Lng"], x["Lat"]), axis=1))
 
     # show unknown locations on map in antartic
     data.northing = data.northing.apply(lambda x: -15000000 if pd.isnull(x) else x)
     data.easting = data.easting.apply(lambda x: 0 if pd.isnull(x) else x)
 
     return data
+
 
 def update_df():
     df["size"] = 9
@@ -94,7 +95,7 @@ def update_source(s):
     update_df()
 
     # create a ColumnDataSource from the  data set
-    s.data.update({"size":df["size"], "color":df["color"]})
+    s.data.update({"size": df["size"], "color": df["color"]})
 
 
 #######################
@@ -120,29 +121,29 @@ def create_crossfilter(s):
     x_title = x.value.title()
     y_title = y.value.title()
 
-    p = figure(plot_height=700, plot_width=700, #responsive=True,
+    p = figure(plot_height=700, plot_width=700,  # responsive=True,
                tools="wheel_zoom, pan, save, reset, box_select, tap",
                active_drag="box_select", active_scroll="wheel_zoom",
                title="%s vs %s" % (y_title, x_title),
-               **kw,)
+               **kw, )
 
     if x.value in discrete:
         p.xaxis.major_label_orientation = pd.np.pi / 4
 
     # plot data on crossfilter
     p.circle(x=x.value, y=y.value, color="color", size="size", source=s, line_color="white",
-                    alpha=0.4,
-                    # set visual properties for selected glyphs
-                    selection_fill_color="color",
-                    selection_fill_alpha=0.4,
-                    selection_line_color="white",
-                    selection_line_alpha=0.6,
+             alpha=0.4,
+             # set visual properties for selected glyphs
+             selection_fill_color="color",
+             selection_fill_alpha=0.4,
+             selection_line_color="white",
+             selection_line_alpha=0.6,
 
-                    # set visual properties for non-selected glyphs
-                    nonselection_fill_color="white",
-                    nonselection_fill_alpha=0.1,
-                    nonselection_line_color="color",
-                    nonselection_line_alpha=0.4,)
+             # set visual properties for non-selected glyphs
+             nonselection_fill_color="white",
+             nonselection_fill_alpha=0.1,
+             nonselection_line_color="color",
+             nonselection_line_alpha=0.4, )
 
     return p
 
@@ -152,7 +153,7 @@ def create_map(s):
     stamen = copy.copy(STAMEN_TERRAIN)
     # create map
     bound = 20000000  # meters
-    m = figure(plot_height=700, plot_width=700, #responsive=True,
+    m = figure(plot_height=700, plot_width=700,  # responsive=True,
                tools="wheel_zoom, pan, reset, box_select, tap",
                active_drag="box_select", active_scroll="wheel_zoom",
                x_range=(-bound, bound), y_range=(-bound, bound))
@@ -161,18 +162,18 @@ def create_map(s):
 
     # plot data on world map
     m.circle(x="es", y="ns", color="color", size="size", source=s, line_color="white",
-                    alpha=0.6,
-                    # set visual properties for selected glyphs
-                    selection_fill_color="color",
-                    selection_fill_alpha=0.4,
-                    selection_line_color="white",
-                    selection_line_alpha=0.6,
+             alpha=0.6,
+             # set visual properties for selected glyphs
+             selection_fill_color="color",
+             selection_fill_alpha=0.4,
+             selection_line_color="white",
+             selection_line_alpha=0.6,
 
-                    # set visual properties for non-selected glyphs
-                    nonselection_fill_color="black",
-                    nonselection_fill_alpha=0.01,
-                    nonselection_line_color="color",
-                    nonselection_line_alpha=0.4,)
+             # set visual properties for non-selected glyphs
+             nonselection_fill_color="black",
+             nonselection_fill_alpha=0.01,
+             nonselection_line_color="color",
+             nonselection_line_alpha=0.4, )
 
     return m
 
@@ -182,6 +183,7 @@ def create_table(cols, s):
     table_cols = [TableColumn(field=col, title=col) for col in cols]
     return DataTable(source=s, columns=table_cols, width=1600, height=250, fit_columns=False, )
 
+
 #############
 # callbacks #
 #############
@@ -190,26 +192,32 @@ def x_change(attr, old, new):
     """Replece crossfilter plot."""
     l.children[0].children[1] = create_crossfilter(source)
 
+
 def y_change(attr, old, new):
     """Replece crossfilter plot."""
     l.children[0].children[1] = create_crossfilter(source)
+
 
 def size_change(attr, old, new):
     """Update ColumnDataSource 'source'."""
     update_source(source)
 
+
 def color_change(attr, old, new):
     """Update ColumnDataSource 'source'."""
     update_source(source)
 
-def selection_change(attrname, old, new):
+
+def selection_change(attr, old, new):
     """Update ColumnDataSource 'table_source' with selection found in 'source'."""
     selected = source.selected['1d']['indices']
     table_source.data = table_source.from_df(df.iloc[selected, :])
 
+
 def palette_change(attr, old, new):
     """Update ColumnDataSource 'source'."""
     update_source(source)
+
 
 ########
 # Main #
@@ -236,13 +244,11 @@ else:
     x = Select(title='X-Axis', value=columns[0], options=columns)
 x.on_change('value', x_change)
 
-
 if 'LD2' in columns:
     y = Select(title='Y-Axis', value='LD2', options=columns)
 else:
     y = Select(title='Y-Axis', value=columns[1], options=columns)
 y.on_change('value', y_change)
-
 
 if 'LD2' in columns:
     size = Select(title='Size', value='posterior_assign', options=['None'] + quantileable)
@@ -346,23 +352,23 @@ jitter_callback = CustomJS(args=dict(source=source, map_jitter=Jitter()), code=r
 download_button = Button(label="Download Selected", button_type="success", callback=download_callback)
 
 jitter_selector = Select(title="Map Jitter Distribution:", value="uniform",
-                      options=["uniform", "normal"], callback=jitter_callback)
+                         options=["uniform", "normal"], callback=jitter_callback)
 
 jitter_slider = Slider(start=0, end=1000, value=0, step=10,
-                           title="Map Jitter Width (Km):", callback=jitter_callback)
+                       title="Map Jitter Width (Km):", callback=jitter_callback)
 
 jitter_callback.args["dist"] = jitter_selector
 jitter_callback.args["slider"] = jitter_slider
 
 # initialize plots
 crossfilter = create_crossfilter(source)
-map = create_map(source)
+mapPlot = create_map(source)
 
 # create layout
 controls = widgetbox([x, y, color, palette, size, jitter_selector, jitter_slider, download_button], width=200)
 table = widgetbox(create_table([col for col in columns if ("LD" not in col)], table_source))
 l = layout([
-    [controls, crossfilter, map],
+    [controls, crossfilter, mapPlot],
     [row(table)]
 ])
 
