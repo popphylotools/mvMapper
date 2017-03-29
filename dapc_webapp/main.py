@@ -51,9 +51,7 @@ def get_data():
 
     return data
 
-
-def create_source():
-    """Return new ColumnDataSource."""
+def update_df():
     df["size"] = 9
     if size.value != 'None':
         try:
@@ -78,6 +76,11 @@ def create_source():
         codes = dict(zip(values, range(len(values))))
         groups = [codes[val] for val in df[color.value].values]
         df["color"] = [colors[xx] for xx in groups]
+
+
+def create_source():
+    """Return new ColumnDataSource."""
+    update_df()
 
     df["ns"] = df["northing"]
     df["es"] = df["easting"]
@@ -87,35 +90,12 @@ def create_source():
 
 
 def update_source(s):
-    """Update `size` and `color` columns of ColumnDataSource 's' to reflect """
-    df["size"] = 9
-    if size.value != 'None':
-        try:
-            groups = pd.qcut(df[size.value].values, len(SIZES))
-        except ValueError:
-            groups = pd.cut(df[size.value].values, len(SIZES))
-        df["size"] = [SIZES[xx] for xx in groups.codes]
-
-    df["color"] = "#31AADE"
-    if color.value != 'None' and color.value in quantileable:
-        colors = linear_palette(palettes[palette.value], default_color_count)
-        try:
-            groups = pd.qcut(df[color.value].values, len(colors))
-        except ValueError:
-            groups = pd.cut(df[color.value].values, len(colors))
-        df["color"] = [colors[xx] for xx in groups.codes]
-    elif color.value != 'None' and color.value in discrete_colorable:
-        values = df[color.value][pd.notnull(df[color.value])].unique()
-        colors = linear_palette(palettes[palette.value], len(values))
-        if all([val.isnumeric() for val in values]):
-            values = sorted(values, key=lambda x: float(x))
-        codes = dict(zip(values, range(len(values))))
-        groups = [codes[val] for val in df[color.value].values]
-        df["color"] = [colors[xx] for xx in groups]
-
+    """Update `size` and `color` columns of ColumnDataSource 's' to reflect widget selections"""
+    update_df()
 
     # create a ColumnDataSource from the  data set
     s.data.update({"size":df["size"], "color":df["color"]})
+
 
 #######################
 # Data Visualizations #
@@ -151,10 +131,10 @@ def create_crossfilter(s):
 
     # plot data on crossfilter
     p.circle(x=x.value, y=y.value, color="color", size="size", source=s, line_color="white",
-                    alpha=0.6,
+                    alpha=0.4,
                     # set visual properties for selected glyphs
                     selection_fill_color="color",
-                    selection_fill_alpha=0.6,
+                    selection_fill_alpha=0.4,
                     selection_line_color="white",
                     selection_line_alpha=0.6,
 
@@ -162,7 +142,7 @@ def create_crossfilter(s):
                     nonselection_fill_color="white",
                     nonselection_fill_alpha=0.1,
                     nonselection_line_color="color",
-                    nonselection_line_alpha=0.6,)
+                    nonselection_line_alpha=0.4,)
 
     return p
 
@@ -184,7 +164,7 @@ def create_map(s):
                     alpha=0.6,
                     # set visual properties for selected glyphs
                     selection_fill_color="color",
-                    selection_fill_alpha=0.6,
+                    selection_fill_alpha=0.4,
                     selection_line_color="white",
                     selection_line_alpha=0.6,
 
@@ -192,7 +172,7 @@ def create_map(s):
                     nonselection_fill_color="black",
                     nonselection_fill_alpha=0.01,
                     nonselection_line_color="color",
-                    nonselection_line_alpha=0.6,)
+                    nonselection_line_alpha=0.4,)
 
     return m
 
