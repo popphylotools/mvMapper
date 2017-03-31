@@ -22,7 +22,7 @@ palettes = {k: v for k, v in cc.palette.items() if
              k not in ["bkr", "coolwarm", "bjy", "bky", "gwv"])}
 
 # data path
-dataPath = "data/webapp_data.csv"
+dataPath = "data/webapp_input.csv"
 
 
 ##################
@@ -33,7 +33,7 @@ def get_data(path):
     """Read data from csv and transform map coordinates.
     :param path:
     """
-    data = pd.read_csv("data/webapp_data.csv")
+    data = pd.read_csv(dataPath)
 
     for col in data.columns:
         if col in force_discrete_colorable:
