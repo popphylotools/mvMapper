@@ -34,8 +34,10 @@ docker run -d -p 5006:5006 -v <absolute_path_to_local_data_dir>:/bokeh/data wood
 Building and running docker locally
 -----------------------------------
 If you want to make changes and build/run docker locally, you can use the following commands:
-```docker build -t woods26/dapc_webapp:local <path to cloned git repo>
-docker run -d -p 5006:5006 woods26/dapc_webapp:local```
+```
+docker build -t woods26/dapc_webapp:local <path to cloned git repo>
+docker run -d -p 5006:5006 woods26/dapc_webapp:local
+```
 
 
 Running localy without docker
