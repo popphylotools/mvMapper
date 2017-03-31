@@ -36,4 +36,4 @@ df = df.merge(loc_df, on="key", how="left")
 df = df.applymap(lambda x: "NaN" if pd.isnull(x) else x)
 
 # output
-df.to_csv(data_directory + "webapp_data.csv", index=False)
+df.to_csv(data_directory + "webapp_input.csv", index=False)

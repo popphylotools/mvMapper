@@ -22,7 +22,7 @@ palettes = {k: v for k, v in cc.palette.items() if
              k not in ["bkr", "coolwarm", "bjy", "bky", "gwv"])}
 
 # data path
-dataPath = "data/webapp_data.csv"
+dataPath = "data/webapp_input.csv"
 
 
 ##################
