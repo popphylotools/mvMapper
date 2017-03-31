@@ -2,48 +2,55 @@ import copy
 import pandas as pd
 from bokeh.layouts import row, widgetbox, layout
 from bokeh.models import Select, CustomJS, Jitter, DataTable, TableColumn, Slider, Button
+# noinspection PyUnresolvedReferences
 from bokeh.palettes import linear_palette
 from bokeh.plotting import curdoc, figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
 import colorcet as cc
 import pyproj
-import os
 import json
 
-default_color_count = 11
+max_discrete_colors = 255
 SIZES = list(range(6, 22, 3))
 
+# wont
+force_discrete_colorable = ["grp", "assign"]
+
 # define available palettes
-palettes = {k:v for k,v in cc.palette.items() if "_" not in k}
-# palettes = {"rainbow": cc.rainbow,
-#             "inferno": cc.inferno}
+palettes = {k: v for k, v in cc.palette.items() if
+            ("_" not in k and
+             k not in ["bkr", "coolwarm", "bjy", "bky", "gwv"])}
+
+# data path
+dataPath = "data/webapp_data.csv"
 
 
 ##################
 # data handling #
 ##################
 
-def get_data():
-    """Read data from csv and transform map coordinates. """
+def get_data(path):
+    """Read data from csv and transform map coordinates.
+    :param path:
+    """
     data = pd.read_csv("data/webapp_data.csv")
 
-    if 'grp' in data.columns:
-        data['grp'] = data['grp'].apply(str)
-    if 'assign' in data.columns:
-        data['assign'] = data['assign'].apply(str)
+    for col in data.columns:
+        if col in force_discrete_colorable:
+            data[col] = data[col].apply(str)
 
     data = data.applymap(lambda x: "NaN" if pd.isnull(x) else x)
 
     # transform coords to map projection
     wgs84 = pyproj.Proj(init="epsg:4326")
-    webMer = pyproj.Proj(init="epsg:3857")
+    web_mer = pyproj.Proj(init="epsg:3857")
     data["easting"] = "NaN"
     data["northing"] = "NaN"
     data["easting"] = data["easting"].astype("float64")
     data["northing"] = data["northing"].astype("float64")
     data.loc[pd.notnull(data["Lng"]), "easting"], data.loc[pd.notnull(data["Lat"]), "northing"] = zip(
         *data.loc[pd.notnull(data["Lng"]) & pd.notnull(data["Lat"])].apply(
-            lambda x: pyproj.transform(wgs84, webMer, x["Lng"], x["Lat"]), axis=1))
+            lambda x: pyproj.transform(wgs84, web_mer, x["Lng"], x["Lat"]), axis=1))
 
     # show unknown locations on map in antartic
     data.northing = data.northing.apply(lambda x: -15000000 if pd.isnull(x) else x)
@@ -52,70 +59,64 @@ def get_data():
     return data
 
 
-def create_source():
-    """Return new ColumnDataSource."""
-    df["size"] = 9
-    if size.value != 'None':
+def update_df(_df):
+    _df["size"] = 9
+    if size.value != 'None' and size.value in discrete_sizeable:
+        values = _df[size.value][pd.notnull(_df[size.value])].unique()
+        if all([val.isnumeric() for val in values]):
+            values = sorted(values, key=lambda x: float(x))
+        codes = dict(zip(values, range(len(values))))
+        groups = [codes[val] for val in _df[size.value].values]
+        _df["size"] = [SIZES[xx] for xx in groups]
+    elif size.value != 'None' and size.value in continuous:
         try:
-            groups = pd.qcut(df[size.value].values, len(SIZES))
+            groups = pd.qcut(_df[size.value].values, len(SIZES))
         except ValueError:
-            groups = pd.cut(df[size.value].values, len(SIZES))
-        df["size"] = [SIZES[xx] for xx in groups.codes]
+            groups = pd.cut(_df[size.value].values, len(SIZES))
+        _df["size"] = [SIZES[xx] for xx in groups.codes]
 
-    df["color"] = "#31AADE"
-    if color.value != 'None' and color.value in quantileable:
-        colors = linear_palette(palettes[palette.value], default_color_count)
-        try:
-            groups = pd.qcut(df[color.value].values, len(colors))
-        except ValueError:
-            groups = pd.cut(df[color.value].values, len(colors))
-        df["color"] = [colors[xx] for xx in groups.codes]
-    elif color.value != 'None' and color.value in discrete_colorable:
-        values = df[color.value][pd.notnull(df[color.value])].unique()
+    _df["color"] = "#31AADE"
+    if color.value != 'None' and color.value in discrete_colorable:
+        values = _df[color.value][pd.notnull(_df[color.value])].unique()
         colors = linear_palette(palettes[palette.value], len(values))
         if all([val.isnumeric() for val in values]):
             values = sorted(values, key=lambda x: float(x))
         codes = dict(zip(values, range(len(values))))
-        groups = [codes[val] for val in df[color.value].values]
-        df["color"] = [colors[xx] for xx in groups]
+        groups = [codes[val] for val in _df[color.value].values]
+        _df["color"] = [colors[xx] for xx in groups]
+    elif color.value != 'None' and color.value in continuous:
+        # colors = linear_palette(palettes[palette.value], max_discrete_colors)
+        # try:
+        #     groups = pd.qcut(_df[color.value].values, len(colors))
+        # except ValueError:
+        colors = palettes[palette.value]
+        groups = pd.cut(_df[color.value].values, len(colors))
+        _df["color"] = [colors[xx] for xx in groups.codes]
 
-    df["ns"] = df["northing"]
-    df["es"] = df["easting"]
 
-    # create a ColumnDataSource from the  data set
-    return ColumnDataSource(df)
+def create_source(_df):
+    """Return new ColumnDataSource.
+    :param _df:
+    """
+    update_df(_df)
 
-
-def update_source(s):
-    """Update `size` and `color` columns of ColumnDataSource 's' to reflect """
-    df["size"] = 9
-    if size.value != 'None':
-        try:
-            groups = pd.qcut(df[size.value].values, len(SIZES))
-        except ValueError:
-            groups = pd.cut(df[size.value].values, len(SIZES))
-        df["size"] = [SIZES[xx] for xx in groups.codes]
-
-    df["color"] = "#31AADE"
-    if color.value != 'None' and color.value in quantileable:
-        colors = linear_palette(palettes[palette.value], default_color_count)
-        try:
-            groups = pd.qcut(df[color.value].values, len(colors))
-        except ValueError:
-            groups = pd.cut(df[color.value].values, len(colors))
-        df["color"] = [colors[xx] for xx in groups.codes]
-    elif color.value != 'None' and color.value in discrete_colorable:
-        values = df[color.value][pd.notnull(df[color.value])].unique()
-        colors = linear_palette(palettes[palette.value], len(values))
-        if all([val.isnumeric() for val in values]):
-            values = sorted(values, key=lambda x: float(x))
-        codes = dict(zip(values, range(len(values))))
-        groups = [codes[val] for val in df[color.value].values]
-        df["color"] = [colors[xx] for xx in groups]
-
+    _df["ns"] = _df["northing"]
+    _df["es"] = _df["easting"]
 
     # create a ColumnDataSource from the  data set
-    s.data.update({"size":df["size"], "color":df["color"]})
+    return ColumnDataSource(_df)
+
+
+def update_source(s, _df):
+    """Update `size` and `color` columns of ColumnDataSource 's' to reflect widget selections
+    :param s:
+    :param _df:
+    """
+    update_df(_df)
+
+    # create a ColumnDataSource from the  data set
+    s.data.update({"size": _df["size"], "color": _df["color"]})
+
 
 #######################
 # Data Visualizations #
@@ -140,29 +141,29 @@ def create_crossfilter(s):
     x_title = x.value.title()
     y_title = y.value.title()
 
-    p = figure(plot_height=700, plot_width=700, #responsive=True,
+    p = figure(plot_height=700, plot_width=700,  # responsive=True,
                tools="wheel_zoom, pan, save, reset, box_select, tap",
                active_drag="box_select", active_scroll="wheel_zoom",
                title="%s vs %s" % (y_title, x_title),
-               **kw,)
+               **kw, )
 
     if x.value in discrete:
         p.xaxis.major_label_orientation = pd.np.pi / 4
 
     # plot data on crossfilter
     p.circle(x=x.value, y=y.value, color="color", size="size", source=s, line_color="white",
-                    alpha=0.6,
-                    # set visual properties for selected glyphs
-                    selection_fill_color="color",
-                    selection_fill_alpha=0.6,
-                    selection_line_color="white",
-                    selection_line_alpha=0.6,
+             alpha=0.6,
+             # set visual properties for selected glyphs
+             selection_fill_color="color",
+             selection_fill_alpha=0.6,
+             selection_line_color="white",
+             selection_line_alpha=0.6,
 
-                    # set visual properties for non-selected glyphs
-                    nonselection_fill_color="white",
-                    nonselection_fill_alpha=0.1,
-                    nonselection_line_color="color",
-                    nonselection_line_alpha=0.6,)
+             # set visual properties for non-selected glyphs
+             nonselection_fill_color="white",
+             nonselection_fill_alpha=0.1,
+             nonselection_line_color="color",
+             nonselection_line_alpha=0.6, )
 
     return p
 
@@ -172,7 +173,7 @@ def create_map(s):
     stamen = copy.copy(STAMEN_TERRAIN)
     # create map
     bound = 20000000  # meters
-    m = figure(plot_height=700, plot_width=700, #responsive=True,
+    m = figure(plot_height=700, plot_width=700,  # responsive=True,
                tools="wheel_zoom, pan, reset, box_select, tap",
                active_drag="box_select", active_scroll="wheel_zoom",
                x_range=(-bound, bound), y_range=(-bound, bound))
@@ -181,18 +182,18 @@ def create_map(s):
 
     # plot data on world map
     m.circle(x="es", y="ns", color="color", size="size", source=s, line_color="white",
-                    alpha=0.6,
-                    # set visual properties for selected glyphs
-                    selection_fill_color="color",
-                    selection_fill_alpha=0.6,
-                    selection_line_color="white",
-                    selection_line_alpha=0.6,
+             alpha=0.6,
+             # set visual properties for selected glyphs
+             selection_fill_color="color",
+             selection_fill_alpha=0.6,
+             selection_line_color="white",
+             selection_line_alpha=0.6,
 
-                    # set visual properties for non-selected glyphs
-                    nonselection_fill_color="black",
-                    nonselection_fill_alpha=0.01,
-                    nonselection_line_color="color",
-                    nonselection_line_alpha=0.6,)
+             # set visual properties for non-selected glyphs
+             nonselection_fill_color="black",
+             nonselection_fill_alpha=0.01,
+             nonselection_line_color="color",
+             nonselection_line_alpha=0.6, )
 
     return m
 
@@ -202,6 +203,7 @@ def create_table(cols, s):
     table_cols = [TableColumn(field=col, title=col) for col in cols]
     return DataTable(source=s, columns=table_cols, width=1600, height=250, fit_columns=False, )
 
+
 #############
 # callbacks #
 #############
@@ -210,44 +212,47 @@ def x_change(attr, old, new):
     """Replece crossfilter plot."""
     l.children[0].children[1] = create_crossfilter(source)
 
+
 def y_change(attr, old, new):
     """Replece crossfilter plot."""
     l.children[0].children[1] = create_crossfilter(source)
 
+
 def size_change(attr, old, new):
     """Update ColumnDataSource 'source'."""
-    update_source(source)
+    update_source(source, df)
+
 
 def color_change(attr, old, new):
     """Update ColumnDataSource 'source'."""
-    update_source(source)
+    update_source(source, df)
 
-def selection_change(attrname, old, new):
+
+def selection_change(attr, old, new):
     """Update ColumnDataSource 'table_source' with selection found in 'source'."""
     selected = source.selected['1d']['indices']
     table_source.data = table_source.from_df(df.iloc[selected, :])
 
+
 def palette_change(attr, old, new):
     """Update ColumnDataSource 'source'."""
-    update_source(source)
+    update_source(source, df)
+
 
 ########
 # Main #
 ########
 
 # load data
-df = get_data()
+df = get_data(dataPath)
 
 # catigorize columns
 columns = [c for c in df.columns if c not in {"easting", "northing"}]
 discrete = [x for x in columns if df[x].dtype == object]
 continuous = [x for x in columns if x not in discrete]
-quantileable = [x for x in continuous if len(df[x].unique()) > 20]
-if ("grp" in columns) and ("assign" in columns):
-    discrete_colorable = [x for x in discrete if len(df[x].unique()) <= max(len(df["grp"].unique()),
-                                                                            len(df["assign"].unique()))]
-else:
-    discrete_colorable = [x for x in discrete if len(df[x].unique()) <= default_color_count]
+discrete_sizeable = [x for x in continuous if len(df[x].unique()) <= len(SIZES)]
+discrete_colorable = [x for x in discrete if (len(df[x].unique()) <= max_discrete_colors) or
+                      ((x in force_discrete_colorable) and (len(df[x].unique()) < 256))]
 
 # create widgets
 if 'LD1' in columns:
@@ -256,24 +261,22 @@ else:
     x = Select(title='X-Axis', value=columns[0], options=columns)
 x.on_change('value', x_change)
 
-
 if 'LD2' in columns:
     y = Select(title='Y-Axis', value='LD2', options=columns)
 else:
     y = Select(title='Y-Axis', value=columns[1], options=columns)
 y.on_change('value', y_change)
 
-
-if 'LD2' in columns:
-    size = Select(title='Size', value='posterior_assign', options=['None'] + quantileable)
+if 'posterior_assign' in columns:
+    size = Select(title='Size', value='posterior_assign', options=['None'] + continuous + discrete_sizeable)
 else:
-    size = Select(title='Size', value='None', options=['None'] + quantileable)
+    size = Select(title='Size', value='None', options=['None'] + continuous + discrete_sizeable)
 size.on_change('value', size_change)
 
-if 'LD2' in columns:
-    color = Select(title='Color', value='assign', options=['None'] + quantileable + discrete_colorable)
+if 'assign' in columns:
+    color = Select(title='Color', value='assign', options=['None'] + continuous + discrete_colorable)
 else:
-    color = Select(title='Color', value='None', options=['None'] + quantileable + discrete_colorable)
+    color = Select(title='Color', value='None', options=['None'] + continuous + discrete_colorable)
 color.on_change('value', color_change)
 
 palette = Select(title='Palette', value="inferno", options=[k for k in palettes.keys()])
@@ -283,7 +286,7 @@ palette.on_change('value', palette_change)
 # initialize sources #
 #####################
 
-source = create_source()
+source = create_source(df)
 source.on_change('selected', selection_change)
 table_source = ColumnDataSource(df)
 
@@ -330,12 +333,12 @@ download_callback = CustomJS(args=dict(table_source=table_source), code=r"""
 
         else {
             var link = document.createElement("a");
-            link = document.createElement('a')
+            link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = filename
+            link.download = filename;
             link.target = "_blank";
             link.style.visibility = 'hidden';
-            link.dispatchEvent(new MouseEvent('click'))
+            link.dispatchEvent(new MouseEvent('click'));
         }
     """ % json.dumps(columns))
 
@@ -366,23 +369,23 @@ jitter_callback = CustomJS(args=dict(source=source, map_jitter=Jitter()), code=r
 download_button = Button(label="Download Selected", button_type="success", callback=download_callback)
 
 jitter_selector = Select(title="Map Jitter Distribution:", value="uniform",
-                      options=["uniform", "normal"], callback=jitter_callback)
+                         options=["uniform", "normal"], callback=jitter_callback)
 
 jitter_slider = Slider(start=0, end=1000, value=0, step=10,
-                           title="Map Jitter Width (Km):", callback=jitter_callback)
+                       title="Map Jitter Width (Km):", callback=jitter_callback)
 
 jitter_callback.args["dist"] = jitter_selector
 jitter_callback.args["slider"] = jitter_slider
 
 # initialize plots
 crossfilter = create_crossfilter(source)
-map = create_map(source)
+mapPlot = create_map(source)
 
 # create layout
-controls = widgetbox([x, y, color, size, palette, jitter_selector, jitter_slider, download_button], width=200)
+controls = widgetbox([x, y, color, palette, size, jitter_selector, jitter_slider, download_button], width=200)
 table = widgetbox(create_table([col for col in columns if ("LD" not in col)], table_source))
 l = layout([
-    [controls, crossfilter, map],
+    [controls, crossfilter, mapPlot],
     [row(table)]
 ])
 
