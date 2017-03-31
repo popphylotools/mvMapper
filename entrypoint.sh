@@ -7,7 +7,7 @@ then
     python scripts/dataprep.py
 fi
 
-# if we have webapp_data.csv, run webapp
+# if we have webapp_input.csv, run webapp
 if [ -e "data/webapp_input.csv" ]
 then
     bokeh serve $BOKEH_APP --host $APP_URL:$APP_PORT --port $APP_PORT

@@ -33,7 +33,7 @@ def get_data(path):
     """Read data from csv and transform map coordinates.
     :param path:
     """
-    data = pd.read_csv("data/webapp_data.csv")
+    data = pd.read_csv(dataPath)
 
     for col in data.columns:
         if col in force_discrete_colorable:
