@@ -27,6 +27,7 @@ posterior["posterior_grp"] = posterior.apply(lambda row: row.loc[row["grp"]], ax
 df = dfs["ind.coord"].rename(columns=lambda x: x.split(".")[-1] if "ind.coord." in x else x)
 df = df.join([dfs["assign"]["assign"], dfs["grp"]["grp"],
               posterior["posterior_assign"], posterior["posterior_grp"]])
+
 # append location information
 loc_df = pd.read_csv(data_directory + "location.csv")
 loc_df.key = loc_df.key.apply(str)
