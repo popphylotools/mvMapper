@@ -2,18 +2,17 @@
 # coding: utf-8
 
 import os
-
 import pandas as pd
-import numpy as np
 
 data_directory = "./data/"
 
 # read in csv's from dapc analisis in R
-fns = {fn.strip().split(".csv")[0]:fn for fn in os.listdir(data_directory) if fn in ["assign.csv", "eig.csv", "ind.coord.csv", "posterior.csv", "grp.csv"]}
-dfs = {n:pd.read_csv(data_directory + fn) for n,fn in fns.items()}
+fns = {fn.strip().split(".csv")[0]: fn for fn in os.listdir(data_directory) if
+       fn in ["assign.csv", "eig.csv", "ind.coord.csv", "posterior.csv", "grp.csv"]}
+dfs = {n: pd.read_csv(data_directory + fn) for n, fn in fns.items()}
 
 # rename 0th column to key
-for n,df in dfs.items():
+for n, df in dfs.items():
     df.rename(columns={df.columns[0]: 'key'}, inplace=True)
     df.key = df.key.apply(str)
 
@@ -28,6 +27,7 @@ posterior["posterior_grp"] = posterior.apply(lambda row: row.loc[row["grp"]], ax
 df = dfs["ind.coord"].rename(columns=lambda x: x.split(".")[-1] if "ind.coord." in x else x)
 df = df.join([dfs["assign"]["assign"], dfs["grp"]["grp"],
               posterior["posterior_assign"], posterior["posterior_grp"]])
+
 # append location information
 loc_df = pd.read_csv(data_directory + "location.csv")
 loc_df.key = loc_df.key.apply(str)
@@ -37,4 +37,4 @@ df = df.merge(loc_df, on="key", how="left")
 df = df.applymap(lambda x: "NaN" if pd.isnull(x) else x)
 
 # output
-df.to_csv(data_directory + "webapp_data.csv", index=False)
+df.to_csv(data_directory + "webapp_input.csv", index=False)
