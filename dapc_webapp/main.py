@@ -14,7 +14,7 @@ max_discrete_colors = 255
 SIZES = list(range(6, 22, 3))
 
 # wont
-force_discrete_colorable = ["grp", "assign", "key"]
+force_discrete_colorable = ["grp", "assign"]
 
 # define available palettes
 palettes = {k: v for k, v in cc.palette.items() if
