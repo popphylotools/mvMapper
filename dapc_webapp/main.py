@@ -14,7 +14,8 @@ from bokeh.tile_providers import STAMEN_TERRAIN
 max_discrete_colors = 255
 SIZES = list(range(6, 22, 3))
 
-# wont
+# these columns will be treated as discrete even if numeric and will be added to discrete_colorable regardless of
+# value of max_discrete_colors as long as they contain less then 256 unique values (max of color palette).
 force_discrete_colorable = ["grp", "assign"]
 
 # define available palettes
@@ -31,10 +32,7 @@ dataPath = "data/webapp_input.csv"
 ##################
 
 def get_data(path):
-    """Read data from csv and transform map coordinates.
-    :param path:
-    :return:
-    """
+    """Read data from csv and transform map coordinates."""
     data = pd.read_csv(path)
 
     for col in data.columns:
@@ -62,15 +60,7 @@ def get_data(path):
 
 
 def update_df(_df, _size, _color, _palette, _continuous, _discrete_sizeable, _discrete_colorable):
-    """
-    :param _df:
-    :param _size:
-    :param _color:
-    :param _palette:
-    :param _continuous:
-    :param _discrete_sizeable:
-    :param _discrete_colorable:
-    """
+    """update the size and color columns of the given df based on widget selections and column classifications"""
     _df["size"] = 9
     if _size != 'None' and _size in _discrete_sizeable:
         values = _df[_size][pd.notnull(_df[_size])].unique()
@@ -106,16 +96,7 @@ def update_df(_df, _size, _color, _palette, _continuous, _discrete_sizeable, _di
 
 
 def create_source(_df, _size, _color, _palette, _continuous, _discrete_sizeable, _discrete_colorable):
-    """Return new ColumnDataSource.
-    :param _color:
-    :param _palette:
-    :param _continuous:
-    :param _discrete_sizeable:
-    :param _discrete_colorable:
-    :param _size:
-    :param _df:
-    :return:
-    """
+    """Update df and return new ColumnDataSource."""
     update_df(_df, _size, _color, _palette, _continuous, _discrete_sizeable, _discrete_colorable)
 
     _df["ns"] = _df["northing"]
@@ -126,16 +107,7 @@ def create_source(_df, _size, _color, _palette, _continuous, _discrete_sizeable,
 
 
 def update_source(_source, _df, _size, _color, _palette, _continuous, _discrete_sizeable, _discrete_colorable):
-    """Update `size` and `color` columns of ColumnDataSource _source to reflect widget selections
-    :param _size:
-    :param _color:
-    :param _palette:
-    :param _continuous:
-    :param _discrete_sizeable:
-    :param _discrete_colorable:
-    :param _source:
-    :param _df:
-    """
+    """update df and and propagate changes to source"""
     update_df(_df, _size, _color, _palette, _continuous, _discrete_sizeable, _discrete_colorable)
 
     # create a ColumnDataSource from the  data set
@@ -147,14 +119,7 @@ def update_source(_source, _df, _size, _color, _palette, _continuous, _discrete_
 #######################
 
 def create_crossfilter(_df, _source, _discrete, _x, _y):
-    """Return a crossfilter plot linked to ColumnDataSource _source
-    :param _df:
-    :param _source:
-    :param _discrete:
-    :param _x:
-    :param _y:
-    :return:
-    """
+    """Return a crossfilter plot linked to ColumnDataSource '_source'."""
     kw = dict()
     if _x in _discrete:
         values = _df[_x][pd.notnull(_df[_x])].unique()
@@ -200,10 +165,7 @@ def create_crossfilter(_df, _source, _discrete, _x, _y):
 
 
 def create_map(_source):
-    """Return map linked to ColumnDataSource '_source'.
-    :param _source:
-    :return:
-    """
+    """Return map linked to ColumnDataSource '_source'."""
     stamen = copy.copy(STAMEN_TERRAIN)
     # create map
     bound = 20000000  # meters
@@ -233,11 +195,7 @@ def create_map(_source):
 
 
 def create_table(_columns, _source):
-    """Return table linked to ColumnDataSource '_source'.
-    :param _columns:
-    :param _source:
-    :return:
-    """
+    """Return table linked to ColumnDataSource '_source'."""
     table_cols = [TableColumn(field=col, title=col) for col in _columns]
     return DataTable(source=_source, columns=table_cols, width=1600, height=250, fit_columns=False, )
 
