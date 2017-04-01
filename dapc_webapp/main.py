@@ -1,14 +1,15 @@
 import copy
+import json
+
+import colorcet as cc
 import pandas as pd
+import pyproj
 from bokeh.layouts import row, widgetbox, layout
 from bokeh.models import Select, CustomJS, Jitter, DataTable, TableColumn, Slider, Button
 # noinspection PyUnresolvedReferences
 from bokeh.palettes import linear_palette
 from bokeh.plotting import curdoc, figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
-import colorcet as cc
-import pyproj
-import json
 
 max_discrete_colors = 255
 SIZES = list(range(6, 22, 3))
