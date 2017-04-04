@@ -1,19 +1,21 @@
 import copy
+import json
+
+import colorcet as cc
 import pandas as pd
+import pyproj
 from bokeh.layouts import row, widgetbox, layout
 from bokeh.models import Select, CustomJS, Jitter, DataTable, TableColumn, Slider, Button
 # noinspection PyUnresolvedReferences
 from bokeh.palettes import linear_palette
 from bokeh.plotting import curdoc, figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
-import colorcet as cc
-import pyproj
-import json
 
 max_discrete_colors = 255
 SIZES = list(range(6, 22, 3))
 
-# wont
+# these columns will be treated as discrete even if numeric and will be added to discrete_colorable regardless of
+# value of max_discrete_colors as long as they contain less then 256 unique values (max of color palette).
 force_discrete_colorable = ["grp", "assign"]
 
 # define available palettes
@@ -30,9 +32,7 @@ dataPath = "data/webapp_input.csv"
 ##################
 
 def get_data(path):
-    """Read data from csv and transform map coordinates.
-    :param path:
-    """
+    """Read data from csv and transform map coordinates."""
     data = pd.read_csv(path)
 
     for col in data.columns:
@@ -59,46 +59,45 @@ def get_data(path):
     return data
 
 
-def update_df(_df):
+def update_df(_df, _size, _color, _palette, _continuous, _discrete_sizeable, _discrete_colorable):
+    """update the size and color columns of the given df based on widget selections and column classifications"""
     _df["size"] = 9
-    if size.value != 'None' and size.value in discrete_sizeable:
-        values = _df[size.value][pd.notnull(_df[size.value])].unique()
+    if _size != 'None' and _size in _discrete_sizeable:
+        values = _df[_size][pd.notnull(_df[_size])].unique()
         if all([val.isnumeric() for val in values]):
             values = sorted(values, key=lambda x: float(x))
         codes = dict(zip(values, range(len(values))))
-        groups = [codes[val] for val in _df[size.value].values]
+        groups = [codes[val] for val in _df[_size].values]
         _df["size"] = [SIZES[xx] for xx in groups]
-    elif size.value != 'None' and size.value in continuous:
+    elif _size != 'None' and _size in _continuous:
         try:
-            groups = pd.qcut(_df[size.value].values, len(SIZES))
+            groups = pd.qcut(_df[_size].values, len(SIZES))
         except ValueError:
-            groups = pd.cut(_df[size.value].values, len(SIZES))
+            groups = pd.cut(_df[_size].values, len(SIZES))
         _df["size"] = [SIZES[xx] for xx in groups.codes]
 
     _df["color"] = "#31AADE"
-    if color.value != 'None' and color.value in discrete_colorable:
-        values = _df[color.value][pd.notnull(_df[color.value])].unique()
-        colors = linear_palette(palettes[palette.value], len(values))
+    if _color != 'None' and _color in _discrete_colorable:
+        values = _df[_color][pd.notnull(_df[_color])].unique()
+        colors = linear_palette(palettes[_palette], len(values))
         if all([val.isnumeric() for val in values]):
             values = sorted(values, key=lambda x: float(x))
         codes = dict(zip(values, range(len(values))))
-        groups = [codes[val] for val in _df[color.value].values]
+        groups = [codes[val] for val in _df[_color].values]
         _df["color"] = [colors[xx] for xx in groups]
-    elif color.value != 'None' and color.value in continuous:
-        # colors = linear_palette(palettes[palette.value], max_discrete_colors)
+    elif _color != 'None' and _color in _continuous:
+        # colors = linear_palette(palettes[_palette], max_discrete_colors)
         # try:
-        #     groups = pd.qcut(_df[color.value].values, len(colors))
+        #     groups = pd.qcut(_df[_color].values, len(colors))
         # except ValueError:
-        colors = palettes[palette.value]
-        groups = pd.cut(_df[color.value].values, len(colors))
+        colors = palettes[_palette]
+        groups = pd.cut(_df[_color].values, len(colors))
         _df["color"] = [colors[xx] for xx in groups.codes]
 
 
-def create_source(_df):
-    """Return new ColumnDataSource.
-    :param _df:
-    """
-    update_df(_df)
+def create_source(_df, _size, _color, _palette, _continuous, _discrete_sizeable, _discrete_colorable):
+    """Update df and return new ColumnDataSource."""
+    update_df(_df, _size, _color, _palette, _continuous, _discrete_sizeable, _discrete_colorable)
 
     _df["ns"] = _df["northing"]
     _df["es"] = _df["easting"]
@@ -107,39 +106,36 @@ def create_source(_df):
     return ColumnDataSource(_df)
 
 
-def update_source(s, _df):
-    """Update `size` and `color` columns of ColumnDataSource 's' to reflect widget selections
-    :param s:
-    :param _df:
-    """
-    update_df(_df)
+def update_source(_source, _df, _size, _color, _palette, _continuous, _discrete_sizeable, _discrete_colorable):
+    """update df and and propagate changes to source"""
+    update_df(_df, _size, _color, _palette, _continuous, _discrete_sizeable, _discrete_colorable)
 
     # create a ColumnDataSource from the  data set
-    s.data.update({"size": _df["size"], "color": _df["color"]})
+    _source.data.update({"size": _df["size"], "color": _df["color"]})
 
 
 #######################
 # Data Visualizations #
 #######################
 
-def create_crossfilter(s):
-    """Return a crossfilter plot linked to ColumnDataSource s"""
+def create_crossfilter(_df, _source, _discrete, _x, _y):
+    """Return a crossfilter plot linked to ColumnDataSource '_source'."""
     kw = dict()
-    if x.value in discrete:
-        values = df[x.value][pd.notnull(df[x.value])].unique()
+    if _x in _discrete:
+        values = _df[_x][pd.notnull(_df[_x])].unique()
         if all([val.isnumeric() for val in values]):
             kw["x_range"] = sorted(values, key=lambda x: float(x))
         else:
             kw["x_range"] = sorted(values)
-    if y.value in discrete:
-        values = df[y.value][pd.notnull(df[y.value])].unique()
+    if _y in _discrete:
+        values = _df[_y][pd.notnull(_df[_y])].unique()
         if all([val.isnumeric() for val in values]):
             kw["y_range"] = sorted(values, key=lambda x: float(x))
         else:
             kw["y_range"] = sorted(values)
 
-    x_title = x.value.title()
-    y_title = y.value.title()
+    x_title = _x.title()
+    y_title = _y.title()
 
     p = figure(plot_height=700, plot_width=700,  # responsive=True,
                tools="wheel_zoom, pan, save, reset, box_select, tap",
@@ -147,11 +143,11 @@ def create_crossfilter(s):
                title="%s vs %s" % (y_title, x_title),
                **kw, )
 
-    if x.value in discrete:
+    if _x in _discrete:
         p.xaxis.major_label_orientation = pd.np.pi / 4
 
     # plot data on crossfilter
-    p.circle(x=x.value, y=y.value, color="color", size="size", source=s, line_color="white",
+    p.circle(x=_x, y=_y, color="color", size="size", source=_source, line_color="white",
              alpha=0.6,
              # set visual properties for selected glyphs
              selection_fill_color="color",
@@ -168,8 +164,8 @@ def create_crossfilter(s):
     return p
 
 
-def create_map(s):
-    """Return map linked to ColumnDataSource 's'."""
+def create_map(_source):
+    """Return map linked to ColumnDataSource '_source'."""
     stamen = copy.copy(STAMEN_TERRAIN)
     # create map
     bound = 20000000  # meters
@@ -181,7 +177,7 @@ def create_map(s):
     m.add_tile(stamen)
 
     # plot data on world map
-    m.circle(x="es", y="ns", color="color", size="size", source=s, line_color="white",
+    m.circle(x="es", y="ns", color="color", size="size", source=_source, line_color="white",
              alpha=0.6,
              # set visual properties for selected glyphs
              selection_fill_color="color",
@@ -198,10 +194,10 @@ def create_map(s):
     return m
 
 
-def create_table(cols, s):
-    """Return table linked to ColumnDataSource 's'."""
-    table_cols = [TableColumn(field=col, title=col) for col in cols]
-    return DataTable(source=s, columns=table_cols, width=1600, height=250, fit_columns=False, )
+def create_table(_columns, _source):
+    """Return table linked to ColumnDataSource '_source'."""
+    table_cols = [TableColumn(field=col, title=col) for col in _columns]
+    return DataTable(source=_source, columns=table_cols, width=1600, height=250, fit_columns=False, )
 
 
 #############
@@ -210,22 +206,22 @@ def create_table(cols, s):
 
 def x_change(attr, old, new):
     """Replece crossfilter plot."""
-    l.children[0].children[1] = create_crossfilter(source)
+    l.children[0].children[1] = create_crossfilter(df, source, discrete, x.value, y.value)
 
 
 def y_change(attr, old, new):
     """Replece crossfilter plot."""
-    l.children[0].children[1] = create_crossfilter(source)
+    l.children[0].children[1] = create_crossfilter(df, source, discrete, x.value, y.value)
 
 
 def size_change(attr, old, new):
     """Update ColumnDataSource 'source'."""
-    update_source(source, df)
+    update_source(source, df, size.value, color.value, palette.value, continuous, discrete_sizeable, discrete_colorable)
 
 
 def color_change(attr, old, new):
     """Update ColumnDataSource 'source'."""
-    update_source(source, df)
+    update_source(source, df, size.value, color.value, palette.value, continuous, discrete_sizeable, discrete_colorable)
 
 
 def selection_change(attr, old, new):
@@ -236,7 +232,7 @@ def selection_change(attr, old, new):
 
 def palette_change(attr, old, new):
     """Update ColumnDataSource 'source'."""
-    update_source(source, df)
+    update_source(source, df, size.value, color.value, palette.value, continuous, discrete_sizeable, discrete_colorable)
 
 
 ########
@@ -250,7 +246,7 @@ df = get_data(dataPath)
 columns = [c for c in df.columns if c not in {"easting", "northing"}]
 discrete = [x for x in columns if df[x].dtype == object]
 continuous = [x for x in columns if x not in discrete]
-discrete_sizeable = [x for x in continuous if len(df[x].unique()) <= len(SIZES)]
+discrete_sizeable = [x for x in discrete if len(df[x].unique()) <= len(SIZES)]
 discrete_colorable = [x for x in discrete if (len(df[x].unique()) <= max_discrete_colors) or
                       ((x in force_discrete_colorable) and (len(df[x].unique()) < 256))]
 
@@ -268,15 +264,15 @@ else:
 y.on_change('value', y_change)
 
 if 'posterior_assign' in columns:
-    size = Select(title='Size', value='posterior_assign', options=['None'] + continuous + discrete_sizeable)
+    size = Select(title='Size', value='posterior_assign', options=['None'] + discrete_sizeable + continuous)
 else:
-    size = Select(title='Size', value='None', options=['None'] + continuous + discrete_sizeable)
+    size = Select(title='Size', value='None', options=['None'] + discrete_sizeable + continuous)
 size.on_change('value', size_change)
 
 if 'assign' in columns:
-    color = Select(title='Color', value='assign', options=['None'] + continuous + discrete_colorable)
+    color = Select(title='Color', value='assign', options=['None'] + discrete_colorable + continuous)
 else:
-    color = Select(title='Color', value='None', options=['None'] + continuous + discrete_colorable)
+    color = Select(title='Color', value='None', options=['None'] + discrete_colorable + continuous)
 color.on_change('value', color_change)
 
 palette = Select(title='Palette', value="inferno", options=[k for k in palettes.keys()])
@@ -286,7 +282,7 @@ palette.on_change('value', palette_change)
 # initialize sources #
 #####################
 
-source = create_source(df)
+source = create_source(df, size.value, color.value, palette.value, continuous, discrete_sizeable, discrete_colorable)
 source.on_change('selected', selection_change)
 table_source = ColumnDataSource(df)
 
@@ -378,7 +374,7 @@ jitter_callback.args["dist"] = jitter_selector
 jitter_callback.args["slider"] = jitter_slider
 
 # initialize plots
-crossfilter = create_crossfilter(source)
+crossfilter = create_crossfilter(source, source, discrete, x.value, y.value)
 mapPlot = create_map(source)
 
 # create layout
