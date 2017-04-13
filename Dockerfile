@@ -5,7 +5,6 @@ RUN conda install -y pyproj
 RUN conda install -y -c r r
 RUN conda install -y colorcet
 
-ENV BOKEH_APP /bokeh/dapc_webapp/
 ENV APP_URL localhost
 ENV APP_PORT 5006
 
