@@ -3,13 +3,13 @@
 
 """
 This script is used to synthesise a single webapp_input.csv with data of interest pulled from the various dapc tables
-as well as from a separately included localities.csv
+as well as from a separately included location.csv
 
 The dapc data includes the keys and loadings from 'ind.coord.csv'; the a priori group (grp) and
 model predicted group (assign) from their respective csv's; and the corresponding posterior probabilities
 for the 'grp' and 'assign' columns from 'posterior.csv'.
 
-The localities.csv must include at least a 'key', 'lat', and 'lng' column, but can include any additional metadata.
+The location.csv must include at least a 'key', 'lat', and 'lng' column, but can include any additional metadata.
 """
 
 import os
@@ -65,7 +65,7 @@ df = df.join([dfs["assign"]["assign"], dfs["grp"]["grp"],
 
 """append location information"""
 # pull location data into a csv
-loc_df = pd.read_csv(data_directory + "localities.csv")
+loc_df = pd.read_csv(data_directory + "location.csv")
 
 # be sure to treat key as a string even if it's numeric
 loc_df.key = loc_df.key.apply(str)
