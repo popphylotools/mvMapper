@@ -4,7 +4,7 @@ This webapp serves as an interactive data exploration tool for population geneti
 
 Pipeline
 --------
-This webapp is built to be modular and generalized. Because of this, it would be relitively easy to adapt it to visualize data from another analisis. The webapp itself actually consumes a csv called `webapp_input.csv` Which is only required to have `key`, `lat`, and `lng` columns as described below in the section partaining to `location.csv`. Additional colomns are optional. The preperation pipeline consists of two scripts. The first is an R script that simply dumps the tables from `dapc.rds` to `.csv`'s. The second is a python script which: collects colomns of interest from these `.csv`'s, synthisises additional colomns from data in these `.csv`'s, and finally merges in the seperatly provided location information from `location.csv`. The flow of the pipeline is orchestrated by `entrypoint.sh`.
+This webapp is built to be modular and generalized. Because of this, it would be relitively easy to adapt it to visualize data from another analisis. The webapp itself actually consumes a csv called `webapp_input.csv` Which is only required to have `key`, `lat`, and `lng` columns as described below in the section partaining to `localities.csv`. Additional colomns are optional. The preperation pipeline consists of two scripts. The first is an R script that simply dumps the tables from `dapc.rds` to `.csv`'s. The second is a python script which: collects colomns of interest from these `.csv`'s, synthisises additional colomns from data in these `.csv`'s, and finally merges in the seperatly provided location information from `localities.csv`. The flow of the pipeline is orchestrated by `entrypoint.sh`.
 
 Preparing data
 ---------------
@@ -12,7 +12,7 @@ This webapp pipeline is designed to consume a DAPC data object created with the 
 
 Once you have run the DAPC and have an active DAPC object in R, for example called `dapc1` in following the DAPC tutorial, you can save it by running `saveRDS(dapc1, file="dapc.rds")`
 
-You must then create a location.csv file that, at minimum, includes a `key` column matching the keys (individual identifiers) used in the input for the DAPC, as well as `Lat` and `Lng` columns containing the decimal coordinates associated with each sample.
+You must then create a localities.csv file that, at minimum, includes a `key` column matching the keys (individual identifiers) used in the input for the DAPC, as well as `Lat` and `Lng` columns containing the decimal coordinates associated with each sample.
 
 you can include additional columns of information which will be ingested and displayed within the webapp (e.g. host, sex, morphological characteristics, etc.).
 
@@ -26,7 +26,7 @@ Then just open a web browser, and navigate to `localhost:5006`
 
 
 
-Run with dapc.rds and location.csv in <absolute_path_to_local_data_dir> for your own data
+Run with dapc.rds and localities.csv in <absolute_path_to_local_data_dir> for your own data
 ```
 docker run -d -p 5006:5006 -v <absolute_path_to_local_data_dir>:/bokeh/data woods26/dapc_webapp:latest
 ```
