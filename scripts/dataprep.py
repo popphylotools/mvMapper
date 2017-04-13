@@ -9,7 +9,7 @@ The dapc data includes the keys and loadings from 'ind.coord.csv'; the a priori 
 model predicted group (assign) from their respective csv's; and the corresponding posterior probabilities
 for the 'grp' and 'assign' columns from 'posterior.csv'.
 
-The localities.csv must include at least a 'key', 'lat', and 'lng' column, but can include any additional metadata.
+The localities.csv must include at least a 'key', 'lat', and 'lon' column, but can include any additional metadata.
 """
 
 import os

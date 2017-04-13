@@ -48,9 +48,9 @@ def get_data(path):
     data["northing"] = "NaN"
     data["easting"] = data["easting"].astype("float64")
     data["northing"] = data["northing"].astype("float64")
-    data.loc[pd.notnull(data["Lng"]), "easting"], data.loc[pd.notnull(data["Lat"]), "northing"] = zip(
-        *data.loc[pd.notnull(data["Lng"]) & pd.notnull(data["Lat"])].apply(
-            lambda x: pyproj.transform(wgs84, web_mer, x["Lng"], x["Lat"]), axis=1))
+    data.loc[pd.notnull(data["lon"]), "easting"], data.loc[pd.notnull(data["lat"]), "northing"] = zip(
+        *data.loc[pd.notnull(data["lon"]) & pd.notnull(data["lat"])].apply(
+            lambda x: pyproj.transform(wgs84, web_mer, x["lon"], x["lat"]), axis=1))
 
     # show unknown locations on map in antartic
     data.northing = data.northing.apply(lambda x: -15000000 if pd.isnull(x) else x)
