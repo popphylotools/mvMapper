@@ -4,7 +4,7 @@ This webapp serves as an interactive data exploration tool for population geneti
 
 Pipeline
 --------
-This webapp is built to be modular and generalized. Because of this, it would be relitively easy to adapt it to visualize data from another analisis. The webapp itself actually consumes a csv called `webapp_input.csv` Which is only required to have `key`, `lat`, and `lng` columns as described below in the section partaining to `location.csv`. Additional colomns are optional. The preperation pipeline consists of two scripts. The first is an R script that simply dumps the tables from `dapc.rds` to `.csv`'s. The second is a python script which: collects colomns of interest from these `.csv`'s, synthisises additional colomns from data in these `.csv`'s, and finally merges in the seperatly provided location information from `location.csv`. The flow of the pipeline is orchestrated by `entrypoint.sh`.
+This webapp is built to be modular and generalized. Because of this, it would be relitively easy to adapt it to visualize data from another analysis. The webapp itself actually consumes a csv called `webapp_input.csv` Which is only required to have `key`, `lat`, and `lon` columns as described below in the section partaining to `localities.csv`. Additional colomns are optional. The preperation pipeline consists of two scripts. The first is an R script that simply dumps the tables from `dapc.rds` to `.csv`'s. The second is a python script which: collects colomns of interest from these `.csv`'s, synthisises additional colomns from data in these `.csv`'s, and finally merges in the seperatly provided location information from `location.csv`. The flow of the pipeline is orchestrated by `entrypoint.sh`.
 
 Preparing data
 ---------------
