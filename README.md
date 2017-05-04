@@ -4,11 +4,11 @@ This webapp serves as an interactive data exploration tool for population geneti
 
 Pipeline
 --------
-This webapp is built to be modular and generalized. Because of this, it would be relitively easy to adapt it to visualize data from another analisis. The webapp itself actually consumes a csv called `webapp_input.csv` Which is only required to have `key`, `lat`, and `lon` columns as described below in the section partaining to `localities.csv`. Additional colomns are optional. The preperation pipeline consists of two scripts. The first is an R script that simply dumps the tables from `dapc.rds` to `.csv`'s. The second is a python script which: collects colomns of interest from these `.csv`'s, synthisises additional colomns from data in these `.csv`'s, and finally merges in the seperatly provided location information from `localities.csv`. The flow of the pipeline is orchestrated by `entrypoint.sh`.
+This webapp is built to be modular and generalized. Because of this, it would be relatively easy to adapt it to visualize data from another analysis. The webapp itself actually consumes a csv called `webapp_input.csv`, which is only required to have `key`, `lat`, and `lon` columns as described below in the section partaining to `localities.csv`. Additional columns are optional. The preperation pipeline consists of two scripts. The first is an R script that simply dumps the tables from `dapc.rds` to `.csv`'s. The second is a python script that: collects colomns of interest from these `.csv`'s, synthesizes additional columns from data in these `.csv`'s, and finally merges in the separately provided location information from `localities.csv`. The flow of the pipeline is orchestrated by `entrypoint.sh`.
 
 Preparing data
 ---------------
-This webapp pipeline is designed to consume a DAPC data object created with the R library adegenet. The particulars of that analisis go beyond the scope of this document, however a tutorial is available [here](adegenet.r-forge.r-project.org/files/tutorial-dapc.pdf)
+This webapp pipeline is designed to consume a DAPC data object created with the R library adegenet. The particulars of that analysis go beyond the scope of this document, however a tutorial is available [here](adegenet.r-forge.r-project.org/files/tutorial-dapc.pdf)
 
 Once you have run the DAPC and have an active DAPC object in R, for example called `dapc1` in following the DAPC tutorial, you can save it by running `saveRDS(dapc1, file="dapc.rds")`
 
@@ -42,7 +42,7 @@ docker run -d -p 5006:5006 woods26/dapc_webapp:local
 
 Running localy without docker
 -----------------------------
-In order to run locally without docker I would sugest following the install process outlined in the Dockerfile as a guide. I reccomend installing Anaconda3, then using conda to install pyproj and R if your system doesn't already have it.
+In order to run locally without docker I would suggest following the install process outlined in the Dockerfile as a guide. I recommend installing Anaconda3, then using conda to install pyproj and R if your system doesn't already have it.
 
 
 Example Data
