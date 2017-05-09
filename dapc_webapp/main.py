@@ -374,7 +374,7 @@ jitter_callback.args["dist"] = jitter_selector
 jitter_callback.args["slider"] = jitter_slider
 
 # initialize plots
-crossfilter = create_crossfilter(source, source, discrete, x.value, y.value)
+crossfilter = create_crossfilter(df, source, discrete, x.value, y.value)
 mapPlot = create_map(source)
 
 # create layout
