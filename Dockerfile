@@ -12,7 +12,7 @@ EXPOSE 5006
 WORKDIR /bokeh
 
 COPY data /bokeh/data
-COPY data /bokeh/config
+COPY config /bokeh/config
 COPY dapc_webapp /bokeh/dapc_webapp
 
 VOLUME ["/bokeh/data"]

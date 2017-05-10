@@ -197,32 +197,38 @@ def create_table(_columns, _source):
 # callbacks #
 #############
 
+# noinspection PyUnusedLocal
 def x_change(attr, old, new):
     """Replece crossfilter plot."""
     l.children[0].children[1] = create_crossfilter(df, source, discrete, x.value, y.value)
 
 
+# noinspection PyUnusedLocal
 def y_change(attr, old, new):
     """Replece crossfilter plot."""
     l.children[0].children[1] = create_crossfilter(df, source, discrete, x.value, y.value)
 
 
+# noinspection PyUnusedLocal
 def size_change(attr, old, new):
     """Update ColumnDataSource 'source'."""
     update_source(source, df, size.value, color.value, palette.value, continuous, discrete_sizeable, discrete_colorable)
 
 
+# noinspection PyUnusedLocal
 def color_change(attr, old, new):
     """Update ColumnDataSource 'source'."""
     update_source(source, df, size.value, color.value, palette.value, continuous, discrete_sizeable, discrete_colorable)
 
 
+# noinspection PyUnusedLocal
 def selection_change(attr, old, new):
     """Update ColumnDataSource 'table_source' with selection found in 'source'."""
     selected = source.selected['1d']['indices']
     table_source.data = table_source.from_df(df.iloc[selected, :])
 
 
+# noinspection PyUnusedLocal
 def palette_change(attr, old, new):
     """Update ColumnDataSource 'source'."""
     update_source(source, df, size.value, color.value, palette.value, continuous, discrete_sizeable, discrete_colorable)
@@ -248,25 +254,33 @@ discrete_colorable = [x for x in discrete if (len(df[x].unique()) <= config["max
                       ((x in config["force_discrete_colorable"]) and (len(df[x].unique()) < 256))]
 
 # create widgets
-assert(config["default_xAxis"] in columns)
-x = Select(title='X-Axis', value=config["default_xAxis"], options=columns)
+x = Select(title='X-Axis',
+           value=(config.get("default_xAxis") if config.get("default_yAxis") in columns else columns[1]),
+           options=columns)
 x.on_change('value', x_change)
 
-assert(config["default_yAxis"] in columns)
-y = Select(title='Y-Axis', value=config["default_yAxis"], options=columns)
+y = Select(title='Y-Axis',
+           value=(config.get("default_yAxis") if config.get("default_yAxis") in columns else columns[2]),
+           options=columns)
 y.on_change('value', y_change)
 
-assert(config["default_colorBy"] in columns)
-color = Select(title='Color', value=config["default_colorBy"], options=['None'] + discrete_colorable + continuous)
+sizeOptions = ['None'] + discrete_sizeable + continuous
+size = Select(title='Size',
+              value=(config.get("default_sizeBy") if config.get("default_yAxis") in sizeOptions else 'None'),
+              options=sizeOptions)
+size.on_change('value', size_change)
+
+colorOptions = ['None'] + discrete_colorable + continuous
+color = Select(title='Color',
+               value=(config.get("default_colorBy") if config.get("default_yAxis") in colorOptions else 'None'),
+               options=colorOptions)
 color.on_change('value', color_change)
 
-assert(config["default_palette"] in palettes.keys())
-palette = Select(title='Palette', value=config["default_palette"], options=[k for k in palettes.keys()])
+palleteOptions = [k for k in palettes.keys()]
+palette = Select(title='Palette',
+                 value=(config.get("default_palette") if config.get("default_yAxis") in palleteOptions else "inferno"),
+                 options=palleteOptions)
 palette.on_change('value', palette_change)
-
-assert(config["default_sizeBy"] in columns)
-size = Select(title='Size', value=config["default_sizeBy"], options=['None'] + discrete_sizeable + continuous)
-size.on_change('value', size_change)
 
 #####################
 # initialize sources #
