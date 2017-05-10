@@ -1,5 +1,6 @@
 import copy
 import json
+import pytoml
 
 import colorcet as cc
 import pandas as pd
@@ -11,30 +12,26 @@ from bokeh.palettes import linear_palette
 from bokeh.plotting import curdoc, figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
 
-max_discrete_colors = 255
 SIZES = list(range(6, 22, 3))
-
-# these columns will be treated as discrete even if numeric and will be added to discrete_colorable regardless of
-# value of max_discrete_colors as long as they contain less then 256 unique values (max of color palette).
-force_discrete_colorable = ["grp", "assign"]
 
 # define available palettes
 palettes = {k: v for k, v in cc.palette.items() if
             ("_" not in k and
              k not in ["bkr", "coolwarm", "bjy", "bky", "gwv"])}
 
-# data path
-dataPath = "data/webapp_input.csv"
+# config file
+configPath = "config/config.toml"
 
 
 ##################
 # data handling #
 ##################
 
-def get_data(path):
+def get_data(path, force_discrete_colorable):
     """Read data from csv and transform map coordinates."""
     data = pd.read_csv(path)
 
+    # data from columns in force_discrete_colorable will be treated as discrete even if numeric
     for col in data.columns:
         if col in force_discrete_colorable:
             data[col] = data[col].apply(str)
@@ -52,7 +49,7 @@ def get_data(path):
         *data.loc[pd.notnull(data["lon"]) & pd.notnull(data["lat"])].apply(
             lambda x: pyproj.transform(wgs84, web_mer, x["lon"], x["lat"]), axis=1))
 
-    # show unknown locations on map in antartic
+    # show unknown locations on map in antarctic
     data.northing = data.northing.apply(lambda x: -15000000 if pd.isnull(x) else x)
     data.easting = data.easting.apply(lambda x: 0 if pd.isnull(x) else x)
 
@@ -86,10 +83,6 @@ def update_df(_df, _size, _color, _palette, _continuous, _discrete_sizeable, _di
         groups = [codes[val] for val in _df[_color].values]
         _df["color"] = [colors[xx] for xx in groups]
     elif _color != 'None' and _color in _continuous:
-        # colors = linear_palette(palettes[_palette], max_discrete_colors)
-        # try:
-        #     groups = pd.qcut(_df[_color].values, len(colors))
-        # except ValueError:
         colors = palettes[_palette]
         groups = pd.cut(_df[_color].values, len(colors))
         _df["color"] = [colors[xx] for xx in groups.codes]
@@ -204,32 +197,38 @@ def create_table(_columns, _source):
 # callbacks #
 #############
 
+# noinspection PyUnusedLocal
 def x_change(attr, old, new):
     """Replece crossfilter plot."""
     l.children[0].children[1] = create_crossfilter(df, source, discrete, x.value, y.value)
 
 
+# noinspection PyUnusedLocal
 def y_change(attr, old, new):
     """Replece crossfilter plot."""
     l.children[0].children[1] = create_crossfilter(df, source, discrete, x.value, y.value)
 
 
+# noinspection PyUnusedLocal
 def size_change(attr, old, new):
     """Update ColumnDataSource 'source'."""
     update_source(source, df, size.value, color.value, palette.value, continuous, discrete_sizeable, discrete_colorable)
 
 
+# noinspection PyUnusedLocal
 def color_change(attr, old, new):
     """Update ColumnDataSource 'source'."""
     update_source(source, df, size.value, color.value, palette.value, continuous, discrete_sizeable, discrete_colorable)
 
 
+# noinspection PyUnusedLocal
 def selection_change(attr, old, new):
     """Update ColumnDataSource 'table_source' with selection found in 'source'."""
     selected = source.selected['1d']['indices']
     table_source.data = table_source.from_df(df.iloc[selected, :])
 
 
+# noinspection PyUnusedLocal
 def palette_change(attr, old, new):
     """Update ColumnDataSource 'source'."""
     update_source(source, df, size.value, color.value, palette.value, continuous, discrete_sizeable, discrete_colorable)
@@ -239,43 +238,48 @@ def palette_change(attr, old, new):
 # Main #
 ########
 
+# load config file
+with open(configPath) as toml_data:
+    config = pytoml.load(toml_data)
+
 # load data
-df = get_data(dataPath)
+df = get_data(config["dataPath"], config["force_discrete_colorable"])
 
 # catigorize columns
 columns = [c for c in df.columns if c not in {"easting", "northing"}]
 discrete = [x for x in columns if df[x].dtype == object]
 continuous = [x for x in columns if x not in discrete]
 discrete_sizeable = [x for x in discrete if len(df[x].unique()) <= len(SIZES)]
-discrete_colorable = [x for x in discrete if (len(df[x].unique()) <= max_discrete_colors) or
-                      ((x in force_discrete_colorable) and (len(df[x].unique()) < 256))]
+discrete_colorable = [x for x in discrete if (len(df[x].unique()) <= config["max_discrete_colors"]) or
+                      ((x in config["force_discrete_colorable"]) and (len(df[x].unique()) < 256))]
 
 # create widgets
-if 'LD1' in columns:
-    x = Select(title='X-Axis', value='LD1', options=columns)
-else:
-    x = Select(title='X-Axis', value=columns[0], options=columns)
+x = Select(title='X-Axis',
+           value=(config.get("default_xAxis") if config.get("default_yAxis") in columns else columns[1]),
+           options=columns)
 x.on_change('value', x_change)
 
-if 'LD2' in columns:
-    y = Select(title='Y-Axis', value='LD2', options=columns)
-else:
-    y = Select(title='Y-Axis', value=columns[1], options=columns)
+y = Select(title='Y-Axis',
+           value=(config.get("default_yAxis") if config.get("default_yAxis") in columns else columns[2]),
+           options=columns)
 y.on_change('value', y_change)
 
-if 'posterior_assign' in columns:
-    size = Select(title='Size', value='posterior_assign', options=['None'] + discrete_sizeable + continuous)
-else:
-    size = Select(title='Size', value='None', options=['None'] + discrete_sizeable + continuous)
+sizeOptions = ['None'] + discrete_sizeable + continuous
+size = Select(title='Size',
+              value=(config.get("default_sizeBy") if config.get("default_yAxis") in sizeOptions else 'None'),
+              options=sizeOptions)
 size.on_change('value', size_change)
 
-if 'assign' in columns:
-    color = Select(title='Color', value='assign', options=['None'] + discrete_colorable + continuous)
-else:
-    color = Select(title='Color', value='None', options=['None'] + discrete_colorable + continuous)
+colorOptions = ['None'] + discrete_colorable + continuous
+color = Select(title='Color',
+               value=(config.get("default_colorBy") if config.get("default_yAxis") in colorOptions else 'None'),
+               options=colorOptions)
 color.on_change('value', color_change)
 
-palette = Select(title='Palette', value="inferno", options=[k for k in palettes.keys()])
+palleteOptions = [k for k in palettes.keys()]
+palette = Select(title='Palette',
+                 value=(config.get("default_palette") if config.get("default_yAxis") in palleteOptions else "inferno"),
+                 options=palleteOptions)
 palette.on_change('value', palette_change)
 
 #####################
@@ -379,7 +383,7 @@ mapPlot = create_map(source)
 
 # create layout
 controls = widgetbox([x, y, color, palette, size, jitter_selector, jitter_slider, download_button], width=200)
-table = widgetbox(create_table([col for col in columns if ("LD" not in col)], table_source))
+table = widgetbox(create_table(columns, table_source))
 l = layout([
     [controls, crossfilter, mapPlot],
     [row(table)]
