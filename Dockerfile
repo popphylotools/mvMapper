@@ -9,15 +9,11 @@ ENV APP_URL localhost
 ENV APP_PORT 5006
 
 EXPOSE 5006
-WORKDIR /bokeh
 
-COPY data /bokeh/data
-COPY config /bokeh/config
-COPY dapc_webapp /bokeh/dapc_webapp
+COPY mvMapper /mvMapper
+WORKDIR /mvMapper
 
-VOLUME ["/bokeh/data"]
-VOLUME ["/bokeh/config"]
-
-COPY entrypoint.sh /bokeh/
+VOLUME ["/mvMapper/data"]
+VOLUME ["/mvMapper/config"]
 
 CMD ["sh", "entrypoint.sh"]
