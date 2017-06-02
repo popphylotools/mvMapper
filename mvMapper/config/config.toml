@@ -16,11 +16,6 @@ default_palette = "inferno"
 # default selection for Size dropdown widget
 default_sizeBy = "support"
 
-# coordinates applpied when location information is missing
-[default_coords]
-lon = 0
-lat = -80
-
 # This value determins what discrete (non-numeric) colomns will be avalible in the "Color" dropdown.
 # This can be used to prevent coloring by a column with a large number of unique discrete values which would cause
 # adjacent colors to be visually indistinguishable.
@@ -29,3 +24,8 @@ max_discrete_colors = 255
 # columns named here will be treated as discrete even if numeric and will be added to discrete_colorable regardless
 # of value of max_discrete_colors as long as they contain less then 256 unique values (max of color palette).
 force_discrete_colorable = ["grp", "assigned_grp"]
+
+# coordinates applpied when location information is missing
+[default_coords]
+    lon = 0
+    lat = -80
