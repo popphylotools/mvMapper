@@ -16,6 +16,11 @@ default_palette = "inferno"
 # default selection for Size dropdown widget
 default_sizeBy = "support"
 
+# coordinates applpied when location information is missing
+[default_coords]
+lon = 0
+lat = -80
+
 # This value determins what discrete (non-numeric) colomns will be avalible in the "Color" dropdown.
 # This can be used to prevent coloring by a column with a large number of unique discrete values which would cause
 # adjacent colors to be visually indistinguishable.
