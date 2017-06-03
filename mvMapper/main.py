@@ -31,37 +31,19 @@ class IndexHandler(RequestHandler):
         script = bk_autoload_server(model=None, url='http://localhost:5006/bkapp')
         self.write(template.render(script=script, template="Tornado"))
 
-# class POSTHandler(tornado.web.RequestHandler):
-#     def post(self):
-#         for field_name, files in self.request.files.items():
-#             for info in files:
-#                 filename, content_type = info['filename'], info['content_type']
-#                 body = info['body']
-#                 logging.info('POST "%s" "%s" %d bytes',
-#                              filename, content_type, len(body))
-#
-#         self.write('OK')
-#
-# class fineUploadHandler
-#
-#
-# @tornado.web.stream_request_body
-# class PUTHandler(tornado.web.RequestHandler):
-#     def initialize(self):
-#         self.bytes_read = 0
-#
-#     def data_received(self, chunk):
-#         self.bytes_read += len(chunk)
-#
-#     def put(self, filename):
-#         filename = unquote(filename)
-#         mtype = self.request.headers.get('Content-Type')
-#         logging.info('PUT "%s" "%s" %d bytes', filename, mtype, self.bytes_read)
-#         self.write('OK')
 
+class POSTHandler(tornado.web.RequestHandler):
+    def data_received(self, chunk):
+        pass
 
-# (r"/post", POSTHandler),
-# (r"/(.*)", PUTHandler),
+    def post(self):
+        logging.info(str(self.request.files.items()))
+        for field_name, files in self.request.files.items():
+            for info in files:
+                filename, content_type = info['filename'], info['content_type']
+                body = info['body']
+                logging.info('POST "%s" "%s" %d bytes',
+                             filename, content_type, len(body))
 
 
 bokeh_app = bkApplication(bkFunctionHandler(modify_doc))
@@ -69,7 +51,9 @@ bokeh_app = bkApplication(bkFunctionHandler(modify_doc))
 io_loop = IOLoop.current()
 fineUploaderPath = "fine-uploader"
 server = bkServer({'/bkapp': bokeh_app}, io_loop=io_loop, extra_patterns=[('/', IndexHandler),
-                                                                          (r'/fine-uploader/(.*)', StaticFileHandler, {'path': fineUploaderPath})
+                                                                          (r"/server/upload", POSTHandler),
+                                                                          (r'/fine-uploader/(.*)', StaticFileHandler,
+                                                                           {'path': fineUploaderPath})
                                                                           ])
 server.start()
 

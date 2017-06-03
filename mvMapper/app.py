@@ -55,7 +55,8 @@ def modify_doc(doc):
 
         # show unknown locations on map in antarctic
         default_wgs84 = config.get('default_coords') or {'lon': 0, 'lat': -80}
-        default_web_mer = dict(zip(("lon", "lat"), pyproj.transform(wgs84, web_mer, default_wgs84["lon"], default_wgs84["lat"])))
+        default_web_mer = dict(zip(("lon", "lat"),
+                                   pyproj.transform(wgs84, web_mer, default_wgs84["lon"], default_wgs84["lat"])))
 
         data.easting = data.easting.apply(lambda x: default_web_mer["lon"] if pd.isnull(x) else x)
         data.northing = data.northing.apply(lambda x: default_web_mer["lat"] if pd.isnull(x) else x)
