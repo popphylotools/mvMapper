@@ -14,6 +14,7 @@ from bokeh.models import Select, CustomJS, Jitter, DataTable, TableColumn, Slide
 from bokeh.palettes import linear_palette
 from bokeh.plotting import figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
+import tornado
 
 
 def modify_doc(doc):
@@ -27,9 +28,9 @@ def modify_doc(doc):
     # config file
     configPath = "config/config.toml"
 
-    ##################
+    #################
     # data handling #
-    ##################
+    #################
 
     def get_data(path, force_discrete_colorable):
         """Read data from csv and transform map coordinates."""
@@ -241,7 +242,14 @@ def modify_doc(doc):
         config = pytoml.load(toml_data)
 
     # load data
-    df = get_data(config["dataPath"], config["force_discrete_colorable"])
+    args = doc.session_context.request.arguments
+
+    try:
+        dataPath = "data/" + tornado.escape.url_unescape(args.get('id')[0])
+    except:
+        dataPath = config["dataPath"]
+
+    df = get_data(dataPath, config["force_discrete_colorable"])
 
     # catigorize columns
     columns = [c for c in df.columns if c not in {"easting", "northing"}]
@@ -281,9 +289,9 @@ def modify_doc(doc):
                      options=palleteOptions)
     palette.on_change('value', palette_change)
 
-    #####################
+    ######################
     # initialize sources #
-    #####################
+    ######################
 
     source = create_source(df, size.value, color.value, palette.value, continuous, discrete_sizeable,
                            discrete_colorable)

@@ -1,5 +1,5 @@
 # location of mvmapper_input.csv data file
-dataPath = "data/mvmapper_input.csv"
+dataPath = "exampleData/mvmapper_input.csv"
 
 # default selection for X-Axis dropdown widget
 default_xAxis = "PC1"
