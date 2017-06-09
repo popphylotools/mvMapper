@@ -14,7 +14,14 @@ import uuid
 import tornado
 import json
 
+import sys
+
 env = Environment(loader=FileSystemLoader('templates'))
+appAddress = str(sys.argv[1]) + ":" + str(sys.argv[2])
+appPort = 5006
+
+
+
 
 
 class IndexHandler(RequestHandler):
@@ -65,11 +72,11 @@ bokeh_app = bkApplication(bkFunctionHandler(modify_doc))
 
 io_loop = IOLoop.current()
 fineUploaderPath = "fine-uploader"
-server = bkServer({'/bkapp': bokeh_app}, io_loop=io_loop, extra_patterns=[('/', IndexHandler),
-                                                                          (r"/server/upload", POSTHandler),
-                                                                          (r'/fine-uploader/(.*)', StaticFileHandler,
-                                                                           {'path': fineUploaderPath})
-                                                                          ])
+server = bkServer({'/bkapp': bokeh_app}, io_loop=io_loop, address=appAddress, port=appPort,
+                  extra_patterns=[('/', IndexHandler),
+                                  (r"/server/upload", POSTHandler),
+                                  (r'/fine-uploader/(.*)', StaticFileHandler, {'path': fineUploaderPath})
+                                  ])
 server.start()
 
 if __name__ == '__main__':
