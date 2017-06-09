@@ -23,7 +23,7 @@ class IndexHandler(RequestHandler):
 
     def get(self):
         template = env.get_template('embed.html')
-        script = bk_autoload_server(model=None, url='http://localhost:5006/bkapp')
+        script = bk_autoload_server(model=None, url='/bkapp')
 
         arguments = {}
         id = self.get_argument("id", default="None")
@@ -73,9 +73,5 @@ server = bkServer({'/bkapp': bokeh_app}, io_loop=io_loop, extra_patterns=[('/', 
 server.start()
 
 if __name__ == '__main__':
-    from bokeh.util.browser import view
 
-    print('Opening Tornado app with embedded Bokeh application on http://localhost:5006/')
-
-    io_loop.add_callback(view, "http://localhost:5006/")
     io_loop.start()
