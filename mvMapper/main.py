@@ -17,7 +17,7 @@ import json
 import sys
 
 env = Environment(loader=FileSystemLoader('templates'))
-appAddress = str(sys.argv[1])
+appAddress = [element.strip() for element in sys.argv[1].split(',')]
 appPort = int(sys.argv[2])
 
 
@@ -72,7 +72,7 @@ bokeh_app = bkApplication(bkFunctionHandler(modify_doc))
 
 io_loop = IOLoop.current()
 fineUploaderPath = "fine-uploader"
-server = bkServer({'/bkapp': bokeh_app}, io_loop=io_loop, address=appAddress, port=appPort,
+server = bkServer({'/bkapp': bokeh_app}, io_loop=io_loop, host=appAddress, port=appPort,
                   extra_patterns=[('/', IndexHandler),
                                   (r"/server/upload", POSTHandler),
                                   (r'/fine-uploader/(.*)', StaticFileHandler, {'path': fineUploaderPath})
