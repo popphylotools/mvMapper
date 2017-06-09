@@ -17,8 +17,8 @@ import json
 import sys
 
 env = Environment(loader=FileSystemLoader('templates'))
-appAddress = str(sys.argv[1]) + ":" + str(sys.argv[2])
-appPort = 5006
+appAddress = str(sys.argv[1])
+appPort = int(sys.argv[2])
 
 
 
