@@ -15,6 +15,7 @@ from bokeh.palettes import linear_palette
 from bokeh.plotting import figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
 import tornado
+import tornado.escape
 
 
 def modify_doc(doc):
@@ -247,7 +248,7 @@ def modify_doc(doc):
     try:
         dataPath = "data/" + tornado.escape.url_unescape(args.get('id')[0])
     except:
-        dataPath = config["dataPath"]
+        dataPath = config.get("dataPath", default="exampleData/mvmapper_input.csv")
 
     df = get_data(dataPath, config["force_discrete_colorable"])
 
