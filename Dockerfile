@@ -1,6 +1,7 @@
 FROM continuumio/anaconda3
 MAINTAINER forest.bremer@gmail.com
 
+RUN conda update -y bokeh
 RUN conda install -y pyproj
 RUN conda install -y colorcet
 RUN pip install pytoml

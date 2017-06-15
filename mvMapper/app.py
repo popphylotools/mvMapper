@@ -248,7 +248,7 @@ def modify_doc(doc):
     try:
         dataPath = "data/" + tornado.escape.url_unescape(args.get('id')[0])
     except:
-        dataPath = config.get("dataPath", default="exampleData/mvmapper_input.csv")
+        dataPath = config.get("dataPath", "exampleData/mvmapper_input.csv")
 
     df = get_data(dataPath, config["force_discrete_colorable"])
 
