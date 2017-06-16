@@ -22,4 +22,4 @@ VOLUME ["/mvMapper/config"]
 ENV APP_URL localhost
 ENV APP_PORT 5006
 
-CMD ["source activate mvmapper && exec entrypoint.sh"]
+CMD ["mkdir -p data && source activate mvmapper && python main.py ${APP_URL}:${APP_PORT} 5006"]
