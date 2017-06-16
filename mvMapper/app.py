@@ -27,7 +27,8 @@ def modify_doc(doc):
                  k not in ["bkr", "coolwarm", "bjy", "bky", "gwv"])}
 
     # config file
-    configPath = "config/config.toml"
+    # Todo: make this an argument and an environment variable
+    configPath = "config/dapcConfig.toml"
 
     #################
     # data handling #
