@@ -24,12 +24,9 @@ appPort = int(sys.argv[2])
 
 
 class IndexHandler(RequestHandler):
-    def data_received(self, chunk):
-        pass
-
     def get(self):
         template = env.get_template('embed.html')
-        script = bk_autoload_server(model=None, url='/bkapp', relative_urls=True)
+        script = bk_autoload_server(model=None, url='/bkapp')
 
         arguments = {}
         _id = self.get_argument("id", default="None")
@@ -47,12 +44,6 @@ class IndexHandler(RequestHandler):
 
 
 class POSTHandler(tornado.web.RequestHandler):
-    def data_received(self, chunk):
-        pass
-
-    def __init__(self):
-        pass
-
     def post(self):
         excepted_type = ['text/csv']
         response_to_send = {"success": False}
@@ -76,7 +67,7 @@ bokeh_app = bkApplication(bkFunctionHandler(modify_doc))
 
 io_loop = IOLoop.current()
 fineUploaderPath = "fine-uploader"
-server = bkServer({'/bkapp': bokeh_app}, io_loop=io_loop, allow_websocket_origin=appAddress, port=appPort,
+server = bkServer({'/bkapp': bokeh_app}, io_loop=io_loop, host=appAddress, port=appPort,
                   extra_patterns=[('/', IndexHandler),
                                   (r"/server/upload", POSTHandler),
                                   (r'/fine-uploader/(.*)', StaticFileHandler, {'path': fineUploaderPath})

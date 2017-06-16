@@ -1,15 +1,17 @@
-FROM continuumio/anaconda3
+FROM continuumio/miniconda3
 MAINTAINER forest.bremer@gmail.com
 
-RUN conda update -y bokeh
-RUN conda install -y pyproj
-RUN conda install -y colorcet
-RUN pip install pytoml
-
-ENV APP_URL localhost
-ENV APP_PORT 5006
+# Set the ENTRYPOINT to use bash
+# (this is also where you’d set SHELL,
+# if your version of docker supports this)
+ENTRYPOINT [ "/bin/bash", "-c" ]
 
 EXPOSE 5006
+
+# Use the environment.yml to create the conda environment.
+ADD environment.yml /tmp/environment.yml
+WORKDIR /tmp
+RUN [ "conda", "env", "create" ]
 
 COPY mvMapper /mvMapper
 WORKDIR /mvMapper
@@ -17,4 +19,7 @@ WORKDIR /mvMapper
 VOLUME ["/mvMapper/data"]
 VOLUME ["/mvMapper/config"]
 
-CMD ["sh", "entrypoint.sh"]
+ENV APP_URL localhost
+ENV APP_PORT 5006
+
+CMD ["mkdir -p data && source activate mvmapper && python main.py ${APP_URL}:${APP_PORT} 5006"]
