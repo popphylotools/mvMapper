@@ -16,6 +16,7 @@ from bokeh.plotting import figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
 import tornado
 import tornado.escape
+import os.path
 
 
 def modify_doc(doc):
@@ -28,7 +29,8 @@ def modify_doc(doc):
 
     # config file
     # Todo: make this an argument and an environment variable
-    configPath = "config/dapcConfig.toml"
+    configPath = "config/config.toml" if os.path.isfile("config/dapcConfig.toml") else "defaultConfig/dapcConfig.toml"
+
 
     #################
     # data handling #
@@ -247,9 +249,14 @@ def modify_doc(doc):
     args = doc.session_context.request.arguments
 
     try:
-        dataPath = "data/" + tornado.escape.url_unescape(args.get('id')[0])
+        filename = tornado.escape.url_unescape(args.get('id')[0])
+        filename =  "".join(c for c in filename if c.isalnum()) # insure filename is alphanumeric
+        dataPath = "data/" + filename
     except:
         dataPath = config.get("dataPath", "exampleData/mvmapper_input.csv")
+
+    if not os.path.isfile(dataPath):
+        dataPath = "exampleData/mvmapper_input.csv"
 
     df = get_data(dataPath, config["force_discrete_colorable"])
 
