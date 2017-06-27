@@ -27,11 +27,6 @@ def modify_doc(doc):
                 ("_" not in k and
                  k not in ["bkr", "coolwarm", "bjy", "bky", "gwv"])}
 
-    # config file
-    # Todo: make this an argument and an environment variable
-    configPath = "config/config.toml" if os.path.isfile("config/dapcConfig.toml") else "defaultConfig/dapcConfig.toml"
-
-
     #################
     # data handling #
     #################
@@ -241,22 +236,28 @@ def modify_doc(doc):
     # Main #
     ########
 
+    # get user config and data paths from session arguments
+    args = doc.session_context.request.arguments
+
+    # load config file
+    try:
+        configPath = tornado.escape.url_unescape(args.get('c')[0])
+        configPath = "".join(c for c in configPath if c.isalnum() or (c in ".-_"))  # insure filename is safe
+        configPath = "config/" + configPath
+    except:
+        configPath = "defaultConfig.toml"
+
     # load config file
     with open(configPath) as toml_data:
         config = pytoml.load(toml_data)
 
-    # load data
-    args = doc.session_context.request.arguments
-
+    # load data file
     try:
-        filename = tornado.escape.url_unescape(args.get('id')[0])
-        filename =  "".join(c for c in filename if c.isalnum()) # insure filename is alphanumeric
-        dataPath = "data/" + filename
+        dataPath = tornado.escape.url_unescape(args.get('d')[0])
+        dataPath = "".join(c for c in dataPath if c.isalnum() or (c in ".-_"))  # insure filename is safe
+        dataPath = "data/" + dataPath
     except:
-        dataPath = config.get("dataPath", "exampleData/mvmapper_input.csv")
-
-    if not os.path.isfile(dataPath):
-        dataPath = "exampleData/mvmapper_input.csv"
+        dataPath = config.get("defaultDataPath", "rosenbergData.csv")
 
     df = get_data(dataPath, config["force_discrete_colorable"])
 

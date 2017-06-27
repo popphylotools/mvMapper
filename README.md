@@ -10,7 +10,7 @@ Here we show an example pipeline using **mvMapper** with **DAPC** in **Adegenet*
 
 The export_to_webapp function in adegenet combines data from a DAPC object with location information and supplementary data. The resulting data structure can be easily output as a CSV which is taken as input to our web app.
 
-In this example, we run our analysis to get an active DAPC object in R called `dapc1`. We also read in location information from `localities.csv`. These are combined using the export_to_webapp function and the result is output as `mvmapper_input.csv`.
+In this example, we run our analysis to get an active DAPC object in R called `dapc1`. We also read in location information from `localities.csv`. These are combined using the export_to_webapp function and the result is output as `rosenbergData.csv`.
 
 This localities file can include additional columns of information which will be ingested and displayed within the web app (e.g. host, sex, morphological characteristics, etc.).
 
@@ -28,9 +28,9 @@ The resulting csv can be uploaded through the web app's upload interface, or con
 > # read in localities.csv, which contains “key”, “lat”, and “lon” columns with column headers (this example contains a fourth column “population” which is a text-based population name based on geography)
 > localities <- read.csv(file=”localities.csv”, header=T)
 
-> # generate mvmapper input file and write to “mvmapper_input.csv”
+> # generate mvmapper input file and write to “rosenbergData.csv”
 > out <- export_to_webapp(dapc1,localities)
-> write.csv(out, “mvmapper_input.csv”, row.names=F)
+> write.csv(out, “rosenbergData.csv”, row.names=F)
 ```
 
 Input Files

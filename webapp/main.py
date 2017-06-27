@@ -29,9 +29,12 @@ class IndexHandler(RequestHandler):
         script = bk_autoload_server(model=None, url='/bkapp')
 
         arguments = {}
-        _id = self.get_argument("id", default="None")
-        if _id is not "None":
-            arguments["id"] = _id
+        userConfig = self.get_argument("c", default="None")
+        if userConfig is not "None":
+            arguments["c"] = userConfig
+        userData = self.get_argument("d", default="None")
+        if userData is not "None":
+            arguments["d"] = userData
 
         script_list = script.split("\n")
         script_list[2] = script_list[2][:-1]
@@ -57,8 +60,8 @@ class POSTHandler(tornado.web.RequestHandler):
                 if content_type in excepted_type:
                     with open("data/" + new_filename, 'wb') as outfile:
                         outfile.write(body)
-                        response_to_send["success"] = True
-                        response_to_send["filePath"] = "?id={}".format(new_filename)
+                    response_to_send["success"] = True
+                    response_to_send["linkArguments"] = "?d={}".format(new_filename)
 
         self.write(json.dumps(response_to_send))
 

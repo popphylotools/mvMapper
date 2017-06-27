@@ -1,5 +1,7 @@
-# location of mvmapper_input.csv data file
-dataPath = "exampleData/mvmapper_input.csv"
+# config for adegenet dapc analysis results
+
+# location of default data file
+defaultDataPath = "rosenbergData.csv"
 
 # default selection for X-Axis dropdown widget
 default_xAxis = "PC1"

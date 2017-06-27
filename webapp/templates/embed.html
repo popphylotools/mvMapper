@@ -119,14 +119,13 @@
             },
             callbacks: {
                 onComplete: function(id, name, response) {
-                console.log("running callback :p")
-                    var serverPathToFile = response.filePath,
+                    var linkArguments = response.linkArguments,
                         fileItem = this.getItemByFileId(id);
 
                     if (response.success) {
                         var viewBtn = qq(fileItem).getByClass("btn-info")[0];
 
-                        viewBtn.setAttribute("href", serverPathToFile);
+                        viewBtn.setAttribute("href", linkArguments);
                         qq(viewBtn).removeClass("qq-hide");
                     }
                 }
