@@ -259,19 +259,19 @@ def modify_doc(doc):
     except:
         dataPath = config.get("defaultDataPath", "rosenbergData.csv")
 
-    df = get_data(dataPath, config["force_discrete_colorable"])
+    df = get_data(dataPath, config.get("force_discrete_colorable", []))
 
     # catigorize columns
     columns = [c for c in df.columns if c not in {"easting", "northing"}]
     discrete = [x for x in columns if df[x].dtype == object]
     continuous = [x for x in columns if x not in discrete]
     discrete_sizeable = [x for x in discrete if len(df[x].unique()) <= len(SIZES)]
-    discrete_colorable = [x for x in discrete if (len(df[x].unique()) <= config["max_discrete_colors"]) or
-                          ((x in config["force_discrete_colorable"]) and (len(df[x].unique()) < 256))]
+    discrete_colorable = [x for x in discrete if (len(df[x].unique()) <= config.get("max_discrete_colors", 256)) or
+                          ((x in config.get("force_discrete_colorable", [])) and (len(df[x].unique()) < 256))]
 
     # create widgets
     x = Select(title='X-Axis',
-               value=(config.get("default_xAxis") if config.get("default_yAxis") in columns else columns[1]),
+               value=(config.get("default_xAxis") if config.get("default_xAxis") in columns else columns[1]),
                options=columns)
     x.on_change('value', x_change)
 
@@ -281,22 +281,15 @@ def modify_doc(doc):
     y.on_change('value', y_change)
 
     sizeOptions = ['None'] + discrete_sizeable + continuous
-    size = Select(title='Size',
-                  value=(config.get("default_sizeBy") if config.get("default_yAxis") in sizeOptions else 'None'),
-                  options=sizeOptions)
+    size = Select(title='Size', value=config.get("default_sizeBy", "None"), options=sizeOptions)
     size.on_change('value', size_change)
 
     colorOptions = ['None'] + discrete_colorable + continuous
-    color = Select(title='Color',
-                   value=(config.get("default_colorBy") if config.get("default_yAxis") in colorOptions else 'None'),
-                   options=colorOptions)
+    color = Select(title='Color', value=config.get("default_colorBy", "None"), options=colorOptions)
     color.on_change('value', color_change)
 
     palleteOptions = [k for k in palettes.keys()]
-    palette = Select(title='Palette',
-                     value=(
-                         config.get("default_palette") if config.get("default_yAxis") in palleteOptions else "inferno"),
-                     options=palleteOptions)
+    palette = Select(title='Palette', value=config.get("default_palette", "inferno"), options=palleteOptions)
     palette.on_change('value', palette_change)
 
     ######################
