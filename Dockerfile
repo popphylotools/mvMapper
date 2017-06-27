@@ -13,13 +13,13 @@ ADD environment.yml /tmp/environment.yml
 WORKDIR /tmp
 RUN [ "conda", "env", "create" ]
 
-COPY mvMapper /mvMapper
-WORKDIR /mvMapper
+COPY webapp /webapp
+WORKDIR /webapp
 
-VOLUME ["/mvMapper/data"]
-VOLUME ["/mvMapper/config"]
+VOLUME ["/webapp/data"]
+VOLUME ["/webapp/config"]
 
 ENV APP_URL localhost
 ENV APP_PORT 5006
 
-CMD ["mkdir -p config && mkdir -p data && source activate mvmapper && python main.py ${APP_URL}:${APP_PORT} 5006"]
+CMD ["source activate mvmapper && python main.py ${APP_URL}:${APP_PORT} 5006"]

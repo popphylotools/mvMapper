@@ -1,52 +1,147 @@
-dapcmapper
-===========
-This webapp serves as an interactive data exploration tool for population genetic data analyzed with discriminant analysis of principal components (DAPC) in the R library adegenet. This webapp also requires associated location information and supports additional metadata. It displays a scatterplot with selectors for x-axis, y-axis, point color, and point size, in addition to a worldmap with optional jitter to seperate stacked points. Data selections are linked across the two plots, and a data table below shows details of the selected data, which can also be downloaded as a csv.
+Intro
+=====
+
+This webapp serves as an interactive data exploration tool for multi-variate data with associated location information. The provided example dataset and configuration file demonstrates its use with population genetic data analyzed with discriminant analysis of principal components (DAPC) in the R library adegenet. It displays a scatterplot with selectors for x-axis, y-axis, point color, point size, and color pallet in addition to a world map with optional jitter to separate stacked points. Data selections are linked across the two plots, and a data table below shows details of the selected data, which can also be downloaded as a csv. The bottom of the page contains an upload interface for user generated data files.
 
 Pipeline
+========
+
+Here we show an example pipeline using **mvMapper** with **DAPC** in **Adegenet**. For more details on the DAPC analysis itself, see its [tutorial](adegenet.r-forge.r-project.org/files/tutorial-dapc.pdf).
+
+The export_to_webapp function in adegenet combines data from a DAPC object with location information and supplementary data. The resulting data structure can be easily output as a CSV which is taken as input to our web app.
+
+In this example, we run our analysis to get an active DAPC object in R called `dapc1`. We also read in location information from `localities.csv`. These are combined using the export_to_webapp function and the result is output as `mvmapper_input.csv`.
+
+This localities file can include additional columns of information which will be ingested and displayed within the web app (e.g. host, sex, morphological characteristics, etc.).
+
+The resulting csv can be uploaded through the web app's upload interface, or configured as the default data file.
+
+```
+> # An example using the microsatellite dataset of Rosenberg et al. 2005
+> # Using adegenet 2.0.1
+> # Reading input file
+> Rosenberg <- read.structure("Rosenberg_783msats.str", n.ind=1048, n.loc=783,  onerowperind=F, col.lab=1, col.pop=2, row.marknames=NULL, NA.char="-9", ask=F, quiet=F)
+
+> # DAPC (n.pca determined using xvalDapc, see ??xvalDapc)
+> dapc1 <- dapc(Rosenberg, n.pca=20, n.da=200)
+
+> # read in localities.csv, which contains “key”, “lat”, and “lon” columns with column headers (this example contains a fourth column “population” which is a text-based population name based on geography)
+> localities <- read.csv(file=”localities.csv”, header=T)
+
+> # generate mvmapper input file and write to “mvmapper_input.csv”
+> out <- export_to_webapp(dapc1,localities)
+> write.csv(out, “mvmapper_input.csv”, row.names=F)
+```
+
+Input Files
+===========
+
+This web app uses `webapp/data` and `webapp/config` directories for user provided data and configuration files.
+
+Data
+-----
+
+This webapp is built to be modular and generalized. Because of this, it is relatively easy to adapt it to visualize data from another analysis. The webapp consumes a csv that, at minimum, includes a `key` column (individual identifiers), as well as `lat` and `lon` columns containing the decimal coordinates associated with each sample. Additional columns are optional.
+
+Config
 --------
-This webapp is built to be modular and generalized. Because of this, it would be relatively easy to adapt it to visualize data from another analysis. The webapp itself actually consumes a csv called `mvmapper_input.csv`, which is only required to have `key`, `lat`, and `lon` columns as described below in the section partaining to `localities.csv`. Additional columns are optional. The preperation pipeline consists of two scripts. The first is an R script that simply dumps the tables from `dapc.rds` to `.csv`'s. The second is a python script that: collects colomns of interest from these `.csv`'s, synthesizes additional columns from data in these `.csv`'s, and finally merges in the separately provided location information from `localities.csv`. The flow of the pipeline is orchestrated by `entrypoint.sh`.
 
-Preparing data
----------------
-This webapp pipeline is designed to consume a DAPC data object created with the R library adegenet. The particulars of that analysis go beyond the scope of this document, however a tutorial is available [here](adegenet.r-forge.r-project.org/files/tutorial-dapc.pdf)
+Run Using Docker
+================
 
-Once you have run the DAPC and have an active DAPC object in R, for example called `dapc1` in following the DAPC tutorial, you can save it by running `saveRDS(dapc1, file="dapc.rds")`
+If you have an os that supports [Docker](https://www.docker.com/) and you have root access, docker can provide a straightforward install process.
 
-You must then create a localities.csv file that, at minimum, includes a `key` column matching the keys (individual identifiers) used in the input for the DAPC, as well as `lat` and `lon` columns containing the decimal coordinates associated with each sample.
+On systems which run docker in a virtual machine (such as older windows systems), mvMapper will need to be served as if it's being accessed remotely.
 
-you can include additional columns of information which will be ingested and displayed within the webapp (e.g. host, sex, morphological characteristics, etc.).
+Install
+-------
 
-Running dapcmapper in [Docker](https://www.docker.com/)
-----------------
-Run with example data (see below):
+Using docker, installation is as easy as:
+
 ```
-docker run -d -p 5006:5006 woods26/dapc_webapp:latest
-```
-Then just open a web browser, and navigate to `localhost:5006`
-
-
-
-Run with dapc.rds and localities.csv in <absolute_path_to_local_data_dir> for your own data
-```
-docker run -d -p 5006:5006 -v <absolute_path_to_local_data_dir>:/bokeh/data woods26/dapc_webapp:latest
+docker pull genomeannotation/mvmapper
 ```
 
-Building and running docker locally
------------------------------------
-If you want to make changes and build/run docker locally, you can use the following commands:
+Building the docker locally from source is relatively easy as well.
+
 ```
-docker build -t woods26/dapc_webapp:local <path to cloned git repo>
-docker run -d -p 5006:5006 woods26/dapc_webapp:local
+git clone https://github.com/genomeannotation/mvMapper.git
+cd mvMapper
+docker build -t genomeannotation/mvmapper:local_build .
 ```
 
+Serve
+-----
 
-Running localy without docker
------------------------------
-In order to run locally without docker I would suggest following the install process outlined in the Dockerfile as a guide. I recommend installing Anaconda3, then using conda to install pyproj and R if your system doesn't already have it.
+For local access, by default, the webapp can be accessed at `localhost:5006`.
+Simply run the mvMapper docker in demon mode and forward port 5006 to the host:
+
+```
+docker run -d \
+-p 5006:5006 \
+genomeannotation/mvmapper:latest
+```
+
+If data and config directories are to be managed manually, host directories can be mounted in place of the containers data and config volumes.
+
+```
+docker run -d \
+-p 5006:5006 \
+-v <absolute_path_to_host_data_dir>:/mvMapper/data \
+-v <absolute_path_to_host_config_dir>:/mvMapper/config \
+genomeannotation/mvmapper:latest
+```
+
+For remote access, the default `APP_URL` and `APP_PORT` environmental variables need to be redefined to reflect the address and port at which the web app should be accessible.
+
+```
+docker run -d \
+-p <port_at_which_app_will_be_accessed>:5006 \
+-e "APP_URL=<url_at_which_app_will_be_accessed>" \
+-e "APP_PORT=<port_at_which_app_will_be_accessed>" \
+-v <absolute_path_to_host_data_dir>:/mvMapper/data \
+-v <absolute_path_to_host_config_dir>:/mvMapper/config \
+genomeannotation/mvmapper:latest
+```
+
+Run Without Docker
+==================
+
+When running mvMapper on systems which do not support docker, the `Dockerfile` can be followed as a guide.
+
+Install
+-------
+
+We support installation of dependencies as an anaconda environment using the provided environment.yml.
+
+Once [Anaconda](https://docs.continuum.io/anaconda/install/) is installed:
+
+```
+git clone https://github.com/genomeannotation/mvMapper.git
+cd mvMapper
+conda env create
+```
+
+Serve
+-----
+
+To run mvMapper, activate the conda env, then run main.py with the appropriate parameters.
+
+```
+source activate mvmapper
+python webapp/main.py <url_at_which_app_will_be_accessed>:<port_at_which_app_will_be_accessed> <port_at_which_app_will_be_accessed>
+```
+
+For local access for instance, the final command will be `python main.py localhost:5006 5006`
+
+Delete Old User Data
+====================
+
 
 
 Example Data
-------------
+============
+
 Example data (783 autosomal microsatellite loci genotyped for 1048 individuals from 53 populations) from 
 Rosenberg NA, Mahajan S, Ramachandran S, Zhao C, Pritchard JK, Feldman MW (2005) Clines, clusters, and the effect of study design on the inference of human population structure. PLoS Genetics 1:660-671.
 Available from <https://rosenberglab.stanford.edu/diversity.html>
