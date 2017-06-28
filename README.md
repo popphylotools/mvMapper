@@ -1,7 +1,7 @@
 Intro
 =====
 
-This webapp serves as an interactive data exploration tool for multi-variate data with associated location information.
+This webapp serves as an interactive data exploration tool for multi-variate analyses with associated geographic location information.
 The provided example data set and configuration file demonstrate its use with population genetic data analyzed with discriminant
 analysis of principal components (DAPC) in the R library adegenet. It displays a scatterplot with selectors for x-axis, y-axis,
 point color, point size, and color pallet in addition to a world map with optional jitter to separate stacked points.
@@ -11,16 +11,16 @@ The bottom of the page contains an upload interface for user generated data file
 Pipeline
 ========
 
-Here we show an example pipeline using **mvMapper** with **DAPC** in **Adegenet**.
-For more details on the DAPC analysis itself, see its [tutorial](adegenet.r-forge.r-project.org/files/tutorial-dapc.pdf).
+Here we show an example pipeline using **mvMapper** with **DAPC** in **adegenet**.
+For more details on the DAPC, see its [tutorial](adegenet.r-forge.r-project.org/files/tutorial-dapc.pdf).
 
-The export_to_webapp function in adegenet combines data from a DAPC object with
-location information and supplementary data. The resulting data structure can be easily output as a CSV which is taken as input to our web app.
+The export_to_webapp function in adegenet combines data from commonly-used multivariate analyses with
+location information and supplementary data. The resulting data structure can be easily output as a CSV which is taken as input to our web app. This function currently supports multivariate analyses conducted in adegenet and those based on the duality diagram (dudi. functions) in ade4.
 
-In the following example, we run an analysis to get an active DAPC object in R called `dapc1`.
-We also read in location information from `localities.csv`. These are combined using the export_to_webapp function and the result is output as `rosenbergData.csv`.
-This localities file can include additional columns of information which will be ingested and displayed within the web app (e.g. host, sex, morphological characteristics, etc.).
-The resulting csv can be uploaded through the web app's upload interface, or configured as the default data file.
+In the following example, we conduct DAPC and create an R object called `dapc1`.
+We then read in locality information from `localities.csv`, and combine the two using the export_to_webapp function before writing `rosenbergData.csv`, which is the input file for mvMapper.
+This localities file can include additional columns of information that will be ingested and displayed within the web app (e.g. host, sex, morphological characteristics).
+The resulting csv can be uploaded through the web app's upload interface, or configured as the default data file when running a stand-alone version of mvMapper.
 
 ```
 > # An example using the microsatellite dataset of Rosenberg et al. 2005
@@ -42,7 +42,7 @@ The resulting csv can be uploaded through the web app's upload interface, or con
 Input Files
 ===========
 
-This web app uses `webapp/data` and `webapp/config` directories for user provided data and configuration files.
+The web app uses `webapp/data` and `webapp/config` directories for user provided data and configuration files.
 These files can be selected by adding their file names as optional parameters to the URL following the form:
 
 ```
@@ -53,8 +53,8 @@ Data
 -----
 
 This webapp is built to be modular and generalized.
-Because of this, it is relatively easy to adapt it to visualize data from another analysis.
-he webapp consumes a csv that, at minimum, includes a `key` column (individual identifiers),
+Because of this, it is relatively easy to adapt it to visualize data from other analyses.
+The webapp consumes a csv file that, at minimum, includes a `key` column (individual identifiers),
 as well as `lat` and `lon` columns containing the decimal coordinates associated with each sample.
 Additional columns are optional.
 
@@ -109,7 +109,7 @@ On systems which run docker in a virtual machine (such as older windows systems)
 Install
 -------
 
-Using docker, installation is as easy as:
+Once docker is installed, installation of mvMapper is as easy as:
 
 ```
 docker pull genomeannotation/mvmapper
