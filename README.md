@@ -46,7 +46,6 @@ This webapp is built to be modular and generalized. Because of this, it is relat
 Config
 --------
 
-
 Run Using Docker
 ================
 
@@ -116,7 +115,6 @@ Install
 We support installation of dependencies as an anaconda environment using the provided environment.yml.
 
 Once [Anaconda](https://docs.continuum.io/anaconda/install/) is installed:
-
 
 ```
 git clone https://github.com/genomeannotation/mvMapper.git
