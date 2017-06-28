@@ -1,19 +1,25 @@
 Intro
 =====
 
-This webapp serves as an interactive data exploration tool for multi-variate data with associated location information. The provided example dataset and configuration file demonstrates its use with population genetic data analyzed with discriminant analysis of principal components (DAPC) in the R library adegenet. It displays a scatterplot with selectors for x-axis, y-axis, point color, point size, and color pallet in addition to a world map with optional jitter to separate stacked points. Data selections are linked across the two plots, and a data table below shows details of the selected data, which can also be downloaded as a csv. The bottom of the page contains an upload interface for user generated data files.
+This webapp serves as an interactive data exploration tool for multi-variate data with associated location information.
+The provided example data set and configuration file demonstrate its use with population genetic data analyzed with discriminant
+analysis of principal components (DAPC) in the R library adegenet. It displays a scatterplot with selectors for x-axis, y-axis,
+point color, point size, and color pallet in addition to a world map with optional jitter to separate stacked points.
+Data selections are linked across the two plots, and a data table below shows details of the selected data, which can also be downloaded as a csv.
+The bottom of the page contains an upload interface for user generated data files.
 
 Pipeline
 ========
 
-Here we show an example pipeline using **mvMapper** with **DAPC** in **Adegenet**. For more details on the DAPC analysis itself, see its [tutorial](adegenet.r-forge.r-project.org/files/tutorial-dapc.pdf).
+Here we show an example pipeline using **mvMapper** with **DAPC** in **Adegenet**.
+For more details on the DAPC analysis itself, see its [tutorial](adegenet.r-forge.r-project.org/files/tutorial-dapc.pdf).
 
-The export_to_webapp function in adegenet combines data from a DAPC object with location information and supplementary data. The resulting data structure can be easily output as a CSV which is taken as input to our web app.
+The export_to_webapp function in adegenet combines data from a DAPC object with
+location information and supplementary data. The resulting data structure can be easily output as a CSV which is taken as input to our web app.
 
-In this example, we run our analysis to get an active DAPC object in R called `dapc1`. We also read in location information from `localities.csv`. These are combined using the export_to_webapp function and the result is output as `rosenbergData.csv`.
-
+In the following example, we run an analysis to get an active DAPC object in R called `dapc1`.
+We also read in location information from `localities.csv`. These are combined using the export_to_webapp function and the result is output as `rosenbergData.csv`.
 This localities file can include additional columns of information which will be ingested and displayed within the web app (e.g. host, sex, morphological characteristics, etc.).
-
 The resulting csv can be uploaded through the web app's upload interface, or configured as the default data file.
 
 ```
@@ -37,14 +43,61 @@ Input Files
 ===========
 
 This web app uses `webapp/data` and `webapp/config` directories for user provided data and configuration files.
+These files can be selected by adding their file names as optional parameters to the URL following the form:
+
+```
+<base_url>/?c=<config_filename>&d=<data_filename>
+```
 
 Data
 -----
 
-This webapp is built to be modular and generalized. Because of this, it is relatively easy to adapt it to visualize data from another analysis. The webapp consumes a csv that, at minimum, includes a `key` column (individual identifiers), as well as `lat` and `lon` columns containing the decimal coordinates associated with each sample. Additional columns are optional.
+This webapp is built to be modular and generalized.
+Because of this, it is relatively easy to adapt it to visualize data from another analysis.
+he webapp consumes a csv that, at minimum, includes a `key` column (individual identifiers),
+as well as `lat` and `lon` columns containing the decimal coordinates associated with each sample.
+Additional columns are optional.
 
 Config
---------
+------
+
+The provided config file sets the webapp up for use with the results from a DAPC analysis.
+
+```
+# config for adegenet dapc analysis results
+
+# location of default data file
+defaultDataPath = "data/rosenbergData.csv"
+
+# default selection for X-Axis dropdown widget
+default_xAxis = "PC1"
+
+# default selection for Y-Axis dropdown widget
+default_yAxis = "PC2"
+
+# default selection for Color dropdown widget
+default_colorBy = "assigned_grp"
+
+# default selection for Palette dropdown widget
+default_palette = "inferno"
+
+# default selection for Size dropdown widget
+default_sizeBy = "support"
+
+# This value determins what discrete (non-numeric) colomns will be avalible in the "Color" dropdown.
+# This can be used to prevent coloring by a column with a large number of unique discrete values which would cause
+# adjacent colors to be visually indistinguishable.
+max_discrete_colors = 255
+
+# columns named here will be treated as discrete even if numeric and will be added to discrete_colorable regardless
+# of value of max_discrete_colors as long as they contain less then 256 unique values (max of color palette).
+force_discrete_colorable = ["grp", "assigned_grp"]
+
+# coordinates applpied when location information is missing
+[default_coords]
+    lon = 0
+    lat = -80
+```
 
 Run Using Docker
 ================
@@ -82,7 +135,8 @@ docker run -d \
 genomeannotation/mvmapper:latest
 ```
 
-If data and config directories are to be managed manually, host directories can be mounted in place of the containers data and config volumes.
+If data and config directories are to be managed from the host, host directories can be mounted in place of the containers data and config volumes.
+Note that `rosenbergData.csv` should be placed in the data directory as host directories will not have files automatically copied into them.
 
 ```
 docker run -d \
@@ -103,6 +157,17 @@ docker run -d \
 -v <absolute_path_to_host_config_dir>:/mvMapper/config \
 genomeannotation/mvmapper:latest
 ```
+
+If it is desirable for old uploaded user data to be deleted, set the `DAYS_TO_KEEP_DATA` environment variable in the docker run command.
+For instance, to delete user uploaded data after 2 weeks, add the following line to the above docker run command:
+
+```
+-e "DAYS_TO_KEEP_DATA=14" \
+```
+
+Note that the cron job that handles deletion will ignore file names containing a `.`.
+Data files uploaded through the web interface are assigned a random name with no extension and will thus be affected,
+whereas data files added manually should be given the extension `.csv` and will be left alone.
 
 Run Without Docker
 ==================
@@ -133,11 +198,6 @@ python webapp/main.py <url_at_which_app_will_be_accessed>:<port_at_which_app_wil
 ```
 
 For local access for instance, the final command will be `python main.py localhost:5006 5006`
-
-Delete Old User Data
-====================
-
-
 
 Example Data
 ============
