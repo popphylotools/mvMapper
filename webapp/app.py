@@ -16,7 +16,6 @@ from bokeh.plotting import figure, ColumnDataSource
 from bokeh.tile_providers import STAMEN_TERRAIN
 import tornado
 import tornado.escape
-import os.path
 
 
 def modify_doc(doc):
@@ -257,7 +256,7 @@ def modify_doc(doc):
         dataPath = "".join(c for c in dataPath if c.isalnum() or (c in ".-_"))  # insure filename is safe
         dataPath = "data/" + dataPath
     except:
-        dataPath = config.get("defaultDataPath", "rosenbergData.csv")
+        dataPath = config.get("defaultDataPath", "data/rosenbergData.csv")
 
     df = get_data(dataPath, config.get("force_discrete_colorable", []))
 

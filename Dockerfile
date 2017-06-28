@@ -19,7 +19,11 @@ WORKDIR /webapp
 VOLUME ["/webapp/data"]
 VOLUME ["/webapp/config"]
 
+ADD deleteOldServerData.sh /etc/cron.daily
+RUN chmod +x /etc/cron.daily/deleteOldServerData.sh
+
 ENV APP_URL localhost
 ENV APP_PORT 5006
+ENV DAYS_TO_KEEP_DATA 0 # zero keeps data forever. only filenames with no extension are affected by cron
 
 CMD ["source activate mvmapper && python main.py ${APP_URL}:${APP_PORT} 5006"]
