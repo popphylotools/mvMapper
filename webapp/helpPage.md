@@ -5,7 +5,7 @@ Multivariate Mapper
 
 The input format is a simple comma-delimited tabular file (.CSV) that can either be assembled manually, or generated using mvMapper’s input generation function in the adegenet library (export_to_webapp). This function currently supports multivariate analyses conducted in adegenet and those based on the duality diagram (dudi. functions) in ade4, including principal components analysis (regular and spatial varieties), discriminant analysis of principal components, principal coordinates analysis, non-metric dimensional scaling, and correspondence analysis.
 
-Below, we provide an example of a general workflow (data preparation), usage instructions for the web version of mvMapper, and installation and usage instructions for stand-alone use.
+Below, we provide an example of a general workflow (data preparation), and usage instructions for the web interface of mvMapper.
 
 General Workflow: Data Prep
 ===========================
@@ -20,6 +20,14 @@ Available from <https://rosenberglab.stanford.edu/diversity.html>
 The `export_to_webapp` function in adegenet combines data from commonly-used multivariate analyses with
 location information and supplementary data. The resulting data structure can be easily output as a CSV which is taken as input to our web app. At a minimum, the input to mvMapper must include three columns: `key` (individual identifiers),
 and `lat` and `lon` (containing the decimal coordinates associated with each sample). Additional columns are optional.
+
+| key | lat | lon |
+| --- | --- | --- |
+| 1 | 30.49871492 | 66.5 |
+| 99 | 33.49855601 | 70 |
+| 130 | 26 | 64 |
+| 163 | 25.49063551 | 69 |
+| 213 | 33.48700562 | 70.5 |
 
 In the following example, we conduct DAPC and create an R object called `dapc1`.
 We then read in locality information from `localities.csv`, and combine the two using the `export_to_webapp` function before writing `rosenbergData.csv`, which is the input file for mvMapper.
@@ -54,14 +62,3 @@ Example Data
 Example data (783 autosomal microsatellite loci genotyped for 1048 individuals from 53 populations) from
 Rosenberg NA, Mahajan S, Ramachandran S, Zhao C, Pritchard JK, Feldman MW (2005) Clines, clusters, and the effect of study design on the inference of human population structure. PLoS Genetics 1:660-671.
 Available from <https://rosenberglab.stanford.edu/diversity.html>
-
-Test
-====
-
-| key | lat | lon |
-| --- | --- | --- |
-| 1 | 30.49871492 | 66.5 |
-| 99 | 33.49855601 | 70 |
-| 130 | 26 | 64 |
-| 163 | 25.49063551 | 69 |
-| 213 | 33.48700562 | 70.5 |
