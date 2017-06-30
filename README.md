@@ -45,7 +45,7 @@ Input Files
 The web app uses `webapp/data` and `webapp/config` directories for user provided data and configuration files.
 These files can be selected by adding their file names as optional parameters to the URL following the form:
 
-```
+```bash
 <base_url>/?c=<config_filename>&d=<data_filename>
 ```
 
@@ -63,7 +63,7 @@ Config
 
 The provided config file sets the webapp up for use with the results from a DAPC analysis.
 
-```
+```toml
 # config for adegenet dapc analysis results
 
 # location of default data file
@@ -111,13 +111,13 @@ Install
 
 Once docker is installed, installation of mvMapper is as easy as:
 
-```
+```bash
 docker pull genomeannotation/mvmapper
 ```
 
 Building the docker locally from source is relatively easy as well.
 
-```
+```bash
 git clone https://github.com/genomeannotation/mvMapper.git
 cd mvMapper
 docker build -t genomeannotation/mvmapper:local_build .
@@ -129,7 +129,7 @@ Serve
 For local access, by default, the webapp can be accessed at `localhost:5006`.
 Simply run the mvMapper docker in demon mode and forward port 5006 to the host:
 
-```
+```bash
 docker run -d \
 -p 5006:5006 \
 genomeannotation/mvmapper:latest
@@ -138,7 +138,7 @@ genomeannotation/mvmapper:latest
 If data and config directories are to be managed from the host, host directories can be mounted in place of the containers data and config volumes.
 Note that `rosenbergData.csv` should be placed in the data directory as host directories will not have files automatically copied into them.
 
-```
+```bash
 docker run -d \
 -p 5006:5006 \
 -v <absolute_path_to_host_data_dir>:/mvMapper/data \
@@ -148,7 +148,7 @@ genomeannotation/mvmapper:latest
 
 For remote access, the default `APP_URL` and `APP_PORT` environmental variables need to be redefined to reflect the address and port at which the web app should be accessible.
 
-```
+```bash
 docker run -d \
 -p <port_at_which_app_will_be_accessed>:5006 \
 -e "APP_URL=<url_at_which_app_will_be_accessed>" \
@@ -161,7 +161,7 @@ genomeannotation/mvmapper:latest
 If it is desirable for old uploaded user data to be deleted, set the `DAYS_TO_KEEP_DATA` environment variable in the docker run command.
 For instance, to delete user uploaded data after 2 weeks, add the following line to the above docker run command:
 
-```
+```bash
 -e "DAYS_TO_KEEP_DATA=14" \
 ```
 
@@ -181,7 +181,7 @@ We support installation of dependencies as an anaconda environment using the pro
 
 Once [Anaconda](https://docs.continuum.io/anaconda/install/) is installed:
 
-```
+```bash
 git clone https://github.com/genomeannotation/mvMapper.git
 cd mvMapper
 conda env create
@@ -192,7 +192,7 @@ Serve
 
 To run mvMapper, activate the conda env, then run main.py with the appropriate parameters.
 
-```
+```bash
 source activate mvmapper
 python webapp/main.py <url_at_which_app_will_be_accessed>:<port_at_which_app_will_be_accessed> <port_at_which_app_will_be_accessed>
 ```

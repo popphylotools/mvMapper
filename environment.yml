@@ -9,6 +9,8 @@ dependencies:
 - python=3.6.0=0
 - pyyaml=3.12=py36_0
 - tornado=4.4.2=py36_0
+- markdown2=2.3.4=py36_0
+- pygments=2.2.0=py36_0
 - pip:
   - pytoml==0.1.13
 prefix: /opt/conda

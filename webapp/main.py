@@ -17,6 +17,8 @@ import json
 
 import sys
 
+import markdown2
+
 env = Environment(loader=FileSystemLoader('templates'))
 
 appAddress = [element.strip() for element in sys.argv[1].split(',')]
@@ -65,15 +67,24 @@ class POSTHandler(tornado.web.RequestHandler):
 
         self.write(json.dumps(response_to_send))
 
+class helpHandler(tornado.web.RequestHandler):
+    def get(self):
+        with open("helpPage.md") as f:
+            md = f.read()
+            template = env.get_template('help.html')
+            rendered = template.render(fragment=markdown2.markdown(md, extras=['fenced-code-blocks']))
+            self.write(rendered)
+
 
 bokeh_app = bkApplication(bkFunctionHandler(modify_doc))
 
 io_loop = IOLoop.current()
-fineUploaderPath = "fine-uploader"
 server = bkServer({'/bkapp': bokeh_app}, io_loop=io_loop, host=appAddress, port=appPort,
                   extra_patterns=[('/', IndexHandler),
-                                  (r"/server/upload", POSTHandler),
-                                  (r'/fine-uploader/(.*)', StaticFileHandler, {'path': fineUploaderPath})
+                                  (r'/help', helpHandler),
+                                  (r'/server/upload', POSTHandler),
+                                  (r'/static/(.*)', StaticFileHandler, {'path': "static"}),
+                                  (r'/fine-uploader/(.*)', StaticFileHandler, {'path': "fine-uploader"})
                                   ])
 server.start()
 
