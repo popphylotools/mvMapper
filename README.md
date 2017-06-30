@@ -12,7 +12,7 @@ Pipeline
 ========
 
 Here we show an example pipeline using **mvMapper** with **DAPC** in **adegenet**.
-For more details on the DAPC, see its [tutorial](adegenet.r-forge.r-project.org/files/tutorial-dapc.pdf).
+For more details on the DAPC, see its [tutorial](https://github.com/thibautjombart/adegenet/raw/master/tutorials/tutorial-dapc.pdf).
 
 The export_to_webapp function in adegenet combines data from commonly-used multivariate analyses with
 location information and supplementary data. The resulting data structure can be easily output as a CSV which is taken as input to our web app. This function currently supports multivariate analyses conducted in adegenet and those based on the duality diagram (dudi. functions) in ade4.

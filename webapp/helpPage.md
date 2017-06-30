@@ -1,5 +1,5 @@
-mvMapper
-=====
+Multivariate Mapper
+===================
 
 **mvMapper** is an interactive data exploration tool for multivariate analyses with associated geographic location information. Although we developed mvMapper with population genetic data in mind, it will ingest results of virtually any multivariate analysis of georeferenced data. mvMapper’s greatest strength is facilitating dynamic exploration of the statistical and geographic frameworks side-by-side, a task that is difficult and time-consuming to do in static space. It displays a scatterplot with selectors for x-axis, y-axis, point color, point size, and color pallet in addition to a world map with optional jitter to separate stacked points. Data selections are linked across the two plots, and a data table below shows details of the selected data, which can also be downloaded as a csv.
 
@@ -11,7 +11,7 @@ General Workflow: Data Prep
 ===========================
 
 Here we show an example pipeline using **mvMapper** with **DAPC** in **adegenet**.
-For more details on the DAPC, see its [tutorial](adegenet.r-forge.r-project.org/files/tutorial-dapc.pdf).
+For more details on the DAPC, see its [tutorial](https://github.com/thibautjombart/adegenet/raw/master/tutorials/tutorial-dapc.pdf).
 
 Example data (783 autosomal microsatellite loci genotyped for 1048 individuals from 53 populations) from
 Rosenberg NA, Mahajan S, Ramachandran S, Zhao C, Pritchard JK, Feldman MW (2005) Clines, clusters, and the effect of study design on the inference of human population structure. PLoS Genetics 1:660-671.
@@ -47,3 +47,21 @@ Web Use
 =======
 
 Once you have a CSV input file, such as the one generated above, it can be uploaded to the web interface via the upload interface at the bottom of the page (either drag and drop, or select through the navigation button). When a file is uploaded, it is assigned a random alphanumeric string, and a link is provided to the mvMapper instance for that datafile. This instance is saved on the web server for 14 days, and can be returned to using the web address provided in the link.
+
+Example Data
+============
+
+Example data (783 autosomal microsatellite loci genotyped for 1048 individuals from 53 populations) from
+Rosenberg NA, Mahajan S, Ramachandran S, Zhao C, Pritchard JK, Feldman MW (2005) Clines, clusters, and the effect of study design on the inference of human population structure. PLoS Genetics 1:660-671.
+Available from <https://rosenberglab.stanford.edu/diversity.html>
+
+Test
+====
+
+| key | lat | lon |
+| --- | --- | --- |
+| 1 | 30.49871492 | 66.5 |
+| 99 | 33.49855601 | 70 |
+| 130 | 26 | 64 |
+| 163 | 25.49063551 | 69 |
+| 213 | 33.48700562 | 70.5 |

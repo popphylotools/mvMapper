@@ -69,11 +69,18 @@ class POSTHandler(tornado.web.RequestHandler):
 
 class helpHandler(tornado.web.RequestHandler):
     def get(self):
-        with open("helpPage.md") as f:
-            md = f.read()
-            template = env.get_template('help.html')
-            rendered = template.render(fragment=markdown2.markdown(md, extras=['fenced-code-blocks']))
-            self.write(rendered)
+        template = env.get_template('help.html')
+        rendered = template.render(fragment=markdown2.markdown_path("helpPage.md",
+                                                                    extras=['fenced-code-blocks',
+                                                                            'code-friendly',
+                                                                            'target-blank-links',
+                                                                            'toc',
+                                                                            'tables']))
+        self.write(rendered)
+
+class uploadPageHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.redirect("/static/upload.html")
 
 
 bokeh_app = bkApplication(bkFunctionHandler(modify_doc))
@@ -82,6 +89,7 @@ io_loop = IOLoop.current()
 server = bkServer({'/bkapp': bokeh_app}, io_loop=io_loop, host=appAddress, port=appPort,
                   extra_patterns=[('/', IndexHandler),
                                   (r'/help', helpHandler),
+                                  (r'/upload', uploadPageHandler),
                                   (r'/server/upload', POSTHandler),
                                   (r'/static/(.*)', StaticFileHandler, {'path': "static"}),
                                   (r'/fine-uploader/(.*)', StaticFileHandler, {'path': "fine-uploader"})
