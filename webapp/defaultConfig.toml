@@ -25,7 +25,7 @@ max_discrete_colors = 255
 
 # columns named here will be treated as discrete even if numeric and will be added to discrete_colorable regardless
 # of value of max_discrete_colors as long as they contain less then 256 unique values (max of color palette).
-force_discrete_colorable = ["grp", "assigned_grp"]
+force_discrete_colorable = ["key", "grp", "assigned_grp"]
 
 # coordinates applpied when location information is missing
 [default_coords]
