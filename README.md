@@ -22,7 +22,7 @@ We then read in locality information from `localities.csv`, and combine the two 
 This localities file can include additional columns of information that will be ingested and displayed within the web app (e.g. host, sex, morphological characteristics).
 The resulting csv can be uploaded through the web app's upload interface, or configured as the default data file when running a stand-alone version of mvMapper.
 
-```
+```r
 > # An example using the microsatellite dataset of Rosenberg et al. 2005
 > # Using adegenet 2.0.1
 > # Reading input file
