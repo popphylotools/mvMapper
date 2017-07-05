@@ -80,7 +80,7 @@ class helpHandler(tornado.web.RequestHandler):
 
 class uploadPageHandler(tornado.web.RequestHandler):
     def get(self):
-        self.redirect("/static/upload.html")
+        self.redirect("/stat/upload.html")
 
 
 bokeh_app = bkApplication(bkFunctionHandler(modify_doc))
@@ -91,8 +91,7 @@ server = bkServer({'/bkapp': bokeh_app}, io_loop=io_loop, host=appAddress, port=
                                   (r'/help', helpHandler),
                                   (r'/upload', uploadPageHandler),
                                   (r'/server/upload', POSTHandler),
-                                  (r'/static/(.*)', StaticFileHandler, {'path': "static"}),
-                                  (r'/fine-uploader/(.*)', StaticFileHandler, {'path': "fine-uploader"})
+                                  (r'/stat/(.*)', StaticFileHandler, {'path': "stat"})
                                   ])
 server.start()
 
