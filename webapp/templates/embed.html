@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+{% extends "base.html" %}
+
+{% block head %}
     <meta charset="utf-8">
     <title>mvMapper</title>
-    <link rel="stylesheet" href="/stat/menuStyle.css">
-    <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
-    <!--<script src="script.js"></script>-->
     <style>
         @import url(https://fonts.googleapis.com/css?family=Noto+Sans);
         body {
@@ -16,36 +13,10 @@
           background: #2F2F2F;
          }
     </style>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
+    <!--<meta name="viewport" content="width=1920, initial-scale=1">-->
+{% endblock %}
 
-<body>
-    <!--menu bar-->
-    <div id='cssmenu'>
-    <ul>
-       <li><a href='/'><span>Home</span></a></li>
-       <!--<li class='active has-sub'><a href='#'><span>Products</span></a>-->
-          <!--<ul>-->
-             <!--<li class='has-sub'><a href='#'><span>Product 1</span></a>-->
-                <!--<ul>-->
-                   <!--<li><a href='#'><span>Sub Product</span></a></li>-->
-                   <!--<li class='last'><a href='#'><span>Sub Product</span></a></li>-->
-                <!--</ul>-->
-             <!--</li>-->
-             <!--<li class='has-sub'><a href='#'><span>Product 2</span></a>-->
-                <!--<ul>-->
-                   <!--<li><a href='#'><span>Sub Product</span></a></li>-->
-                   <!--<li class='last'><a href='#'><span>Sub Product</span></a></li>-->
-                <!--</ul>-->
-             <!--</li>-->
-          <!--</ul>-->
-       <!--</li>-->
-       <li><a href='/upload'><span>Upload</span></a></li>
-       <li><a href='/help'><span>Help</span></a></li>
-       <li class='last'><a target="_blank" href='https://github.com/genomeannotation/mvMapper'><span>Github</span></a></li>
-    </ul>
-    </div>
+{% block body %}
     <!--bokeh app-->
     {{ script|safe }}
-</body>
-</html>
+{% endblock %}

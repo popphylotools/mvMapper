@@ -80,8 +80,7 @@ class helpHandler(tornado.web.RequestHandler):
 
 class uploadPageHandler(tornado.web.RequestHandler):
     def get(self):
-        self.redirect("/stat/upload.html")
-
+        self.write(env.get_template('upload.html').render())
 
 bokeh_app = bkApplication(bkFunctionHandler(modify_doc))
 

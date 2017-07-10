@@ -1,41 +1,10 @@
-<!doctype html>
-<html lang="en">
-    <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+{% extends "base.html" %}
+
+{% block head %}
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="/stat/menuStyle.css">
         <link rel="stylesheet" href="/stat/github-markdown.css">
-        <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
-        <!--<script src="script.js"></script>-->
         <meta charset="UTF-8">
         <title>mvMapper help</title>
-    </head>
-    <body>
-        <div id='cssmenu'>
-        <ul>
-           <li><a href='/'><span>Home</span></a></li>
-           <!--<li class='active has-sub'><a href='#'><span>Products</span></a>-->
-              <!--<ul>-->
-                 <!--<li class='has-sub'><a href='#'><span>Product 1</span></a>-->
-                    <!--<ul>-->
-                       <!--<li><a href='#'><span>Sub Product</span></a></li>-->
-                       <!--<li class='last'><a href='#'><span>Sub Product</span></a></li>-->
-                    <!--</ul>-->
-                 <!--</li>-->
-                 <!--<li class='has-sub'><a href='#'><span>Product 2</span></a>-->
-                    <!--<ul>-->
-                       <!--<li><a href='#'><span>Sub Product</span></a></li>-->
-                       <!--<li class='last'><a href='#'><span>Sub Product</span></a></li>-->
-                    <!--</ul>-->
-                 <!--</li>-->
-              <!--</ul>-->
-           <!--</li>-->
-           <li><a href='/upload'><span>Upload</span></a></li>
-           <li><a href='/help'><span>Help</span></a></li>
-           <li class='last'><a target="_blank" href='https://github.com/genomeannotation/mvMapper'><span>Github</span></a></li>
-        </ul>
-        </div>
-
         <style>
             .markdown-body {
                 box-sizing: border-box;
@@ -51,9 +20,10 @@
                 }
             }
         </style>
+{% endblock %}
+
+{% block body %}
         <article class="markdown-body">
                 {{fragment}}
         </article>
-    </body>
-</html>
-
+{% endblock %}
