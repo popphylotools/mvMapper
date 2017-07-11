@@ -13,6 +13,8 @@ General Workflow: Data Prep
 Here we show an example pipeline using **mvMapper** with **DAPC** in **adegenet**.
 For more details on the DAPC, see its [tutorial](https://github.com/thibautjombart/adegenet/raw/master/tutorials/tutorial-dapc.pdf).
 
+##### **Note**: `export_to_webapp` is currently available in the devel version of adegenet. For install instructions click [here](https://github.com/thibautjombart/adegenet/wiki/Installing-adegenet-devel)
+
 The `export_to_webapp` function in adegenet combines data from commonly-used multivariate analyses with
 location information and supplementary data. The resulting data structure can be easily output as a CSV which is taken as input to our web app. At a minimum, the input to mvMapper must include three columns: `key` (individual identifiers),
 and `lat` and `lon` (containing the decimal coordinates associated with each sample). Additional columns are optional:
