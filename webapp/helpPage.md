@@ -5,7 +5,7 @@ Multivariate Mapper
 
 The input format is a simple comma-delimited tabular file (.CSV) that can either be assembled manually, or generated using mvMapper’s input generation function in the adegenet library (export_to_webapp). This function currently supports multivariate analyses conducted in adegenet and those based on the duality diagram (dudi. functions) in ade4, including principal components analysis (regular and spatial varieties), discriminant analysis of principal components, principal coordinates analysis, non-metric dimensional scaling, and correspondence analysis.
 
-Below, we provide an example of a general workflow (data preparation), and usage instructions for the web interface of mvMapper.  All example files can be found on our GitHub page.
+Below, we provide an example of a general workflow (data preparation), and usage instructions for the web interface of mvMapper.  All example files can be found on our GitHub page under the (dataPrepExampleFiles)[https://github.com/popphylotools/mvMapper/tree/master/dataPrepExampleFiles] directory.
 
 General Workflow: Data Prep
 ===========================
@@ -32,7 +32,7 @@ and `lat` and `lon` (containing the decimal coordinates associated with each sam
 In the following example, we conduct DAPC and create an R object called `dapc1`.
 We then read in locality information from `localities.csv`, and combine the two using the `export_to_webapp` function before writing `rosenbergData.csv`, which is the input file for mvMapper.
 This localities file can include additional columns of information that will be ingested and displayed within the web app (e.g. host, sex, morphological characteristics).
-The resulting CSV file can be uploaded through the web app's upload interface, or configured as the default data file when running an mvMapper server (see our GitHub).
+The resulting CSV file can be uploaded through the web app's upload interface, or configured as the default data file when running a custom mvMapper server (see install instructions on our (GitHub)[https://github.com/popphylotools/mvMapper]).
 
 ```r
 # An example using the microsatellite dataset of Rosenberg et al. 2005

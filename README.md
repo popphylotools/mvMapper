@@ -53,7 +53,7 @@ Data
 -----
 
 This webapp is built to be modular and generalized.
-Because of this, it is relatively easy to adapt it to visualize data from other analyses.
+Because of this, it is relatively easy to adapt it to visualize data from various sources.
 The webapp consumes a csv file that, at minimum, includes a `key` column (individual identifiers),
 as well as `lat` and `lon` columns containing the decimal coordinates associated with each sample.
 Additional columns are optional.
@@ -102,9 +102,9 @@ force_discrete_colorable = ["grp", "assigned_grp"]
 Run Using Docker
 ================
 
-If you have an os that supports [Docker](https://www.docker.com/) and you have root access, docker can provide a straightforward install process.
+If you have an os that supports [Docker](https://www.docker.com/), it can provide a straightforward install process. Note that on some systems, Docker has to run as root.
 
-On systems which run docker in a virtual machine (such as older windows systems), mvMapper will need to be served as if it's being accessed remotely.
+On systems which run docker in a virtual machine (such as older windows systems), mvMapper will need to be served using the instructions for remote access found below.
 
 Install
 -------
@@ -112,15 +112,15 @@ Install
 Once docker is installed, installation of mvMapper is as easy as:
 
 ```bash
-docker pull genomeannotation/mvmapper
+docker pull popphylotools/mvmapper
 ```
 
 Building the docker locally from source is relatively easy as well.
 
 ```bash
-git clone https://github.com/genomeannotation/mvMapper.git
+git clone https://github.com/popphylotools/mvMapper.git
 cd mvMapper
-docker build -t genomeannotation/mvmapper:local_build .
+docker build -t popphylotools/mvmapper:local_build .
 ```
 
 Serve
@@ -132,18 +132,18 @@ Simply run the mvMapper docker in demon mode and forward port 5006 to the host:
 ```bash
 docker run -d \
 -p 5006:5006 \
-genomeannotation/mvmapper:latest
+popphylotools/mvmapper:latest
 ```
 
 If data and config directories are to be managed from the host, host directories can be mounted in place of the containers data and config volumes.
-Note that `rosenbergData.csv` should be placed in the data directory as host directories will not have files automatically copied into them.
+Note that `rosenbergData.csv` (or whatever you have configured as the default data file) should be placed in the data directory as host directories will not have files automatically copied into them during docker set up.
 
 ```bash
 docker run -d \
 -p 5006:5006 \
 -v <absolute_path_to_host_data_dir>:/mvMapper/data \
 -v <absolute_path_to_host_config_dir>:/mvMapper/config \
-genomeannotation/mvmapper:latest
+popphylotools/mvmapper:latest
 ```
 
 For remote access, the default `APP_URL` and `APP_PORT` environmental variables need to be redefined to reflect the address and port at which the web app should be accessible.
@@ -155,10 +155,10 @@ docker run -d \
 -e "APP_PORT=<port_at_which_app_will_be_accessed>" \
 -v <absolute_path_to_host_data_dir>:/mvMapper/data \
 -v <absolute_path_to_host_config_dir>:/mvMapper/config \
-genomeannotation/mvmapper:latest
+popphylotools/mvmapper:latest
 ```
 
-If it is desirable for old uploaded user data to be deleted, set the `DAYS_TO_KEEP_DATA` environment variable in the docker run command.
+If it is desirable for old user uploaded data to be deleted, set the `DAYS_TO_KEEP_DATA` environment variable in the docker run command.
 For instance, to delete user uploaded data after 2 weeks, add the following line to the above docker run command:
 
 ```bash
@@ -182,7 +182,7 @@ We support installation of dependencies as an anaconda environment using the pro
 Once [Anaconda](https://docs.continuum.io/anaconda/install/) is installed:
 
 ```bash
-git clone https://github.com/genomeannotation/mvMapper.git
+git clone https://github.com/popphylotools/mvMapper.git
 cd mvMapper
 conda env create
 ```
