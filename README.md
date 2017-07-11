@@ -1,5 +1,5 @@
-Intro
-=====
+mvMapper
+========
 
 This webapp serves as an interactive data exploration tool for multi-variate analyses with associated geographic location information.
 The provided example data set and configuration file demonstrate its use with population genetic data analyzed with discriminant
@@ -31,6 +31,8 @@ Because of this, it is relatively easy to adapt it to visualize data from variou
 The webapp consumes a csv file that, at minimum, includes a `key` column (individual identifiers),
 as well as `lat` and `lon` columns containing the decimal coordinates associated with each sample.
 Additional columns are optional.
+
+Note that `easting` and `northing` are reserved column names used internally, so they should be avoided in the input data file.
 
 Config
 ------

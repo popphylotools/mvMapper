@@ -25,6 +25,8 @@ and `lat` and `lon` (containing the decimal coordinates associated with each sam
 | 163 | 25.49063551 | 69 |
 | 213 | 33.48700562 | 70.5 |
 
+Note that `easting` and `northing` are reserved column names used internally, so they should be avoided in the input data file.
+
 In the following example, we conduct DAPC and create an R object called `dapc1`.
 We then read in locality information from `localities.csv`, and combine the two using the `export_to_webapp` function before writing `rosenbergData.csv`, which is the input file for mvMapper.
 This localities file can include additional columns of information that will be ingested and displayed within the web app (e.g. host, sex, morphological characteristics).
