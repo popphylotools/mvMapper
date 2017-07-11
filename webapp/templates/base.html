@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>mvMapper</title>
+    <link rel="stylesheet" href="/stat/menuStyle.css">
+    <!--<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>-->
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <!--menu bar-->
+    <div id='cssmenu'>
+    <ul>
+       <li><a href='/'><span>Home</span></a></li>
+       <!--<li class='active has-sub'><a href='#'><span>Products</span></a>-->
+          <!--<ul>-->
+             <!--<li class='has-sub'><a href='#'><span>Product 1</span></a>-->
+                <!--<ul>-->
+                   <!--<li><a href='#'><span>Sub Product</span></a></li>-->
+                   <!--<li class='last'><a href='#'><span>Sub Product</span></a></li>-->
+                <!--</ul>-->
+             <!--</li>-->
+             <!--<li class='has-sub'><a href='#'><span>Product 2</span></a>-->
+                <!--<ul>-->
+                   <!--<li><a href='#'><span>Sub Product</span></a></li>-->
+                   <!--<li class='last'><a href='#'><span>Sub Product</span></a></li>-->
+                <!--</ul>-->
+             <!--</li>-->
+          <!--</ul>-->
+       <!--</li>-->
+       <li><a href='/upload'><span>Upload</span></a></li>
+       <li><a href='/help'><span>Help</span></a></li>
+       <li class='last'><a target="_blank" href='https://github.com/popphylotools/mvMapper'><span>Github</span></a></li>
+    </ul>
+    </div>
+    {% block body %}{% endblock %}
+</body>
+</html>

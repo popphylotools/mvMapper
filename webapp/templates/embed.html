@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <meta charset="utf-8">
+    <title>mvMapper</title>
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Noto+Sans);
+        body {
+          font-family: 'Noto Sans', sans-serif;
+          -webkit-font-smoothing: antialiased;
+          text-rendering: optimizeLegibility;
+          color: #898989;
+          background: #2F2F2F;
+         }
+    </style>
+    <!--<meta name="viewport" content="width=1920, initial-scale=1">-->
+{% endblock %}
+
+{% block body %}
+    <!--bokeh app-->
+    {{ script|safe }}
+{% endblock %}

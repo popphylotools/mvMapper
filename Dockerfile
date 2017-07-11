@@ -1,23 +1,29 @@
-FROM continuumio/anaconda3
+FROM continuumio/miniconda3
 MAINTAINER forest.bremer@gmail.com
 
-RUN conda install -y pyproj
-RUN conda install -y -c r r
-RUN conda install -y colorcet
-
-ENV BOKEH_APP /bokeh/dapc_webapp/
-ENV APP_URL localhost
-ENV APP_PORT 5006
+# Set the ENTRYPOINT to use bash
+# (this is also where you’d set SHELL,
+# if your version of docker supports this)
+ENTRYPOINT [ "/bin/bash", "-c" ]
 
 EXPOSE 5006
-WORKDIR /bokeh
 
-COPY scripts /bokeh/scripts
-COPY data /bokeh/data
-COPY dapc_webapp /bokeh/dapc_webapp
+# Use the environment.yml to create the conda environment.
+ADD environment.yml /tmp/environment.yml
+WORKDIR /tmp
+RUN [ "conda", "env", "create" ]
 
-VOLUME ["/bokeh/data"]
+COPY webapp /webapp
+WORKDIR /webapp
 
-COPY entrypoint.sh /bokeh/
+VOLUME ["/webapp/data"]
+VOLUME ["/webapp/config"]
 
-CMD ["sh", "entrypoint.sh"]
+ADD deleteOldServerData.sh /etc/cron.daily
+RUN chmod +x /etc/cron.daily/deleteOldServerData.sh
+
+ENV APP_URL localhost
+ENV APP_PORT 5006
+ENV DAYS_TO_KEEP_DATA 0 # zero keeps data forever. only filenames with no extension are affected by cron
+
+CMD ["source activate mvmapper && python main.py ${APP_URL}:${APP_PORT} 5006"]
