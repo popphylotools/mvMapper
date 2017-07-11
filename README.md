@@ -1,7 +1,7 @@
 mvMapper
 ========
 
-**mvMapper** (Multivariate Mapper) serves as an interactive data exploration tool for multi-variate analyses with associated geographic location information.
+**mvMapper** (Multivariate Mapper) is an interactive data exploration tool for multivariate analyses with associated geographic location information.
 The provided example data set and configuration file demonstrate its use with population genetic data analyzed with discriminant
 analysis of principal components (DAPC) in the R library adegenet. It displays a scatterplot with selectors for x-axis, y-axis,
 point color, point size, and color pallet in addition to a world map with optional jitter to separate stacked points.
