@@ -11,33 +11,7 @@ The bottom of the page contains an upload interface for user generated data file
 Pipeline
 ========
 
-Here we show an example pipeline using **mvMapper** with **DAPC** in **adegenet**.
-For more details on the DAPC, see its [tutorial](https://github.com/thibautjombart/adegenet/raw/master/tutorials/tutorial-dapc.pdf).
-
-The export_to_webapp function in adegenet combines data from commonly-used multivariate analyses with
-location information and supplementary data. The resulting data structure can be easily output as a CSV which is taken as input to our web app. This function currently supports multivariate analyses conducted in adegenet and those based on the duality diagram (dudi. functions) in ade4.
-
-In the following example, we conduct DAPC and create an R object called `dapc1`.
-We then read in locality information from `localities.csv`, and combine the two using the export_to_webapp function before writing `rosenbergData.csv`, which is the input file for mvMapper.
-This localities file can include additional columns of information that will be ingested and displayed within the web app (e.g. host, sex, morphological characteristics).
-The resulting csv can be uploaded through the web app's upload interface, or configured as the default data file when running a stand-alone version of mvMapper.
-
-```r
-> # An example using the microsatellite dataset of Rosenberg et al. 2005
-> # Using adegenet 2.0.1
-> # Reading input file
-> Rosenberg <- read.structure("Rosenberg_783msats.str", n.ind=1048, n.loc=783,  onerowperind=F, col.lab=1, col.pop=2, row.marknames=NULL, NA.char="-9", ask=F, quiet=F)
-
-> # DAPC (n.pca determined using xvalDapc, see ??xvalDapc)
-> dapc1 <- dapc(Rosenberg, n.pca=20, n.da=200)
-
-> # read in localities.csv, which contains “key”, “lat”, and “lon” columns with column headers (this example contains a fourth column “population” which is a text-based population name based on geography)
-> localities <- read.csv(file=”localities.csv”, header=T)
-
-> # generate mvmapper input file and write to “rosenbergData.csv”
-> out <- export_to_webapp(dapc1,localities)
-> write.csv(out, “rosenbergData.csv”, row.names=F)
-```
+See [helpPage.md](webapp/helpPage.md) for an example pipeline using **mvMapper** with **DAPC** in **adegenet**.
 
 Input Files
 ===========
@@ -61,43 +35,8 @@ Additional columns are optional.
 Config
 ------
 
-The provided config file sets the webapp up for use with the results from a DAPC analysis.
-
-```toml
-# config for adegenet dapc analysis results
-
-# location of default data file
-defaultDataPath = "data/rosenbergData.csv"
-
-# default selection for X-Axis dropdown widget
-default_xAxis = "PC1"
-
-# default selection for Y-Axis dropdown widget
-default_yAxis = "PC2"
-
-# default selection for Color dropdown widget
-default_colorBy = "assigned_grp"
-
-# default selection for Palette dropdown widget
-default_palette = "inferno"
-
-# default selection for Size dropdown widget
-default_sizeBy = "support"
-
-# This value determins what discrete (non-numeric) colomns will be avalible in the "Color" dropdown.
-# This can be used to prevent coloring by a column with a large number of unique discrete values which would cause
-# adjacent colors to be visually indistinguishable.
-max_discrete_colors = 255
-
-# columns named here will be treated as discrete even if numeric and will be added to discrete_colorable regardless
-# of value of max_discrete_colors as long as they contain less then 256 unique values (max of color palette).
-force_discrete_colorable = ["grp", "assigned_grp"]
-
-# coordinates applpied when location information is missing
-[default_coords]
-    lon = 0
-    lat = -80
-```
+The provided `defaultConfig.toml` config file sets the webapp up for use with the results from a DAPC analysis.
+All available options are documented as comments, please follow it as an example to create custom config files.
 
 Run Using Docker
 ================
