@@ -13,6 +13,8 @@ General Workflow: Data Prep
 Here we show an example pipeline using **mvMapper** with **DAPC** in **adegenet**.
 For more details on the DAPC, see its [tutorial](https://github.com/thibautjombart/adegenet/raw/master/tutorials/tutorial-dapc.pdf).
 
+#### **Note**: `export_to_webapp` is currently available in the devel version of adegenet. For install instructions click [here](https://github.com/thibautjombart/adegenet/wiki/Installing-adegenet-devel)
+
 The `export_to_webapp` function in adegenet combines data from commonly-used multivariate analyses with
 location information and supplementary data. The resulting data structure can be easily output as a CSV which is taken as input to our web app. At a minimum, the input to mvMapper must include three columns: `key` (individual identifiers),
 and `lat` and `lon` (containing the decimal coordinates associated with each sample). Additional columns are optional:
@@ -30,7 +32,7 @@ Note that `easting` and `northing` are reserved column names used internally, so
 In the following example, we conduct DAPC and create an R object called `dapc1`.
 We then read in locality information from `localities.csv`, and combine the two using the `export_to_webapp` function before writing `rosenbergData.csv`, which is the input file for mvMapper.
 This localities file can include additional columns of information that will be ingested and displayed within the web app (e.g. host, sex, morphological characteristics).
-The resulting CSV file can be uploaded through the web app's upload interface, or configured as the default data file when running a custom mvMapper server (see install instructions on our (GitHub)[https://github.com/popphylotools/mvMapper]).
+The resulting CSV file can be uploaded through the web app's upload interface, or configured as the default data file when running a custom mvMapper server (see install instructions on our [GitHub](https://github.com/popphylotools/mvMapper)).
 
 ```r
 # An example using the microsatellite dataset of Rosenberg et al. 2005
@@ -49,10 +51,10 @@ out <- export_to_webapp(dapc1,localities)
 write.csv(out, “rosenbergData.csv”, row.names=F)
 ```
 
-Web Use
-=======
+Data Upload
+===========
 
-Once you have a CSV input file, such as the one generated above, it can be uploaded to the web interface via the upload interface at the bottom of the page (either drag and drop, or select through the navigation button). When a file is uploaded, it is assigned a random alphanumeric string, and a link is provided which opens mvMapper with this data. User uploaded data persists on the server for 14 days, and can be returned to using the web address provided in the link.
+Once you have a CSV input file, such as the one generated above, it can be uploaded to the web interface via the upload page (either drag and drop, or hit `select files` button). When a file is uploaded, it is assigned a random alphanumeric string, and a link is provided which opens mvMapper with this data. User uploaded data persists on the server for 14 days, and can be returned to using the web address provided in the link.
 
 Example Data
 ============

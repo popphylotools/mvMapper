@@ -1,20 +1,30 @@
 mvMapper
 ========
 
-**mvMapper** (Multivariate Mapper) is an interactive data exploration tool for multivariate analyses with associated geographic location information.
-The provided example data set and configuration file demonstrate its use with population genetic data analyzed with discriminant
-analysis of principal components (DAPC) in the R library adegenet. It displays a scatterplot with selectors for x-axis, y-axis,
-point color, point size, and color pallet in addition to a world map with optional jitter to separate stacked points.
-Data selections are linked across the two plots, and a data table below shows details of the selected data, which can also be downloaded as a csv.
-The bottom of the page contains an upload interface for user generated data files.
+Try a hosted instance of mvMapper [Here](http://ctahr-peps.colo.hawaii.edu/)!
 
-Pipeline
-========
+**mvMapper** (Multivariate Mapper) is an interactive data exploration tool for multivariate analyses with associated geographic location information. Although we developed mvMapper with population genetic data in mind, it will ingest results of virtually any multivariate analysis of georeferenced data. mvMapper’s greatest strength is facilitating dynamic exploration of the statistical and geographic frameworks side-by-side, a task that is difficult and time-consuming to do in static space. It displays a scatterplot with selectors for x-axis, y-axis, point color, point size, and color pallet in addition to a world map with optional jitter to separate overlapping points. Data selections are linked across the two plots, and a data table below shows details of the selected data, which can also be downloaded as a csv.
 
-See [helpPage.md](webapp/helpPage.md) for an example pipeline using **mvMapper** with **DAPC** in **adegenet**.
+Table of contents
+=================
+
+  * [mvMapper](#mvMapper)
+  * [Table of contents](#table-of-contents)
+  * [Hosted Example](#hosted-example)
+  * [Input Files](#input-files)
+  * [Run Using Docker](#run-using-docker)
+  * [Run Without Docker](#run-without-docker)
+  * [Example Data](#example-data)
+
+Hosted Example
+==============
+
+A hosted instance of **mvMapper** is available [Here](http://ctahr-peps.colo.hawaii.edu/). See the corresponding [help](http://ctahr-peps.colo.hawaii.edu/help) page for usage instructions. **Note**, the web app loads slowly on some internet connections. If all you see is a grey screen and the navigation bar, give it a moment!
 
 Input Files
 ===========
+
+See [helpPage.md](webapp/helpPage.md) for an example pipeline using **mvMapper** with **DAPC** in **adegenet**. Note `webapp/helpPage.md` is the source for the help page of the site and can be customized according to your deployment.
 
 The web app uses `webapp/data` and `webapp/config` directories for user provided data and configuration files.
 These files can be selected by adding their file names as optional parameters to the URL following the form:
@@ -34,8 +44,8 @@ Additional columns are optional.
 
 Note that `easting` and `northing` are reserved column names used internally, so they should be avoided in the input data file.
 
-Config
-------
+Configuration
+-------------
 
 The provided `defaultConfig.toml` config file sets the webapp up for use with the results from a DAPC analysis.
 All available options are documented as comments, please follow it as an example to create custom config files.
@@ -50,13 +60,13 @@ On systems which run docker in a virtual machine (such as older windows systems)
 Install
 -------
 
-Once docker is installed, installation of mvMapper is as easy as:
+Once docker is installed, pull the mvMapper container from [our Docker Hub page](https://hub.docker.com/r/genomeannotation/mvmapper):
 
 ```
 docker pull popphylotools/mvmapper
 ```
 
-Building the docker locally from source is relatively easy as well.
+Building the docker locally from source is relatively easy as well:
 
 ```
 git clone https://github.com/popphylotools/mvMapper.git
