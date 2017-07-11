@@ -1,31 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="stylesheet" href="menuStyle.css">
-    <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
-    <!--<script src="script.js"></script>-->
-
-    <style>
-        @import url(https://fonts.googleapis.com/css?family=Noto+Sans);
-        body {
-          font-family: 'Noto Sans', sans-serif;
-          -webkit-font-smoothing: antialiased;
-          text-rendering: optimizeLegibility;
-          color: #898989;
-          background: #2F2F2F;
-         }
-    </style>
+{% extends "base.html" %}
+{% block head %}
+    <!--<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>-->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Fine Uploader New/Modern CSS file
     ====================================================================== -->
-    <link href="fine-uploader/fine-uploader-new.css" rel="stylesheet">
+    <link href="/stat/fine-uploader/fine-uploader-new.css" rel="stylesheet">
 
     <!-- Fine Uploader JS file
     ====================================================================== -->
-    <script src="fine-uploader/fine-uploader.js"></script>
+    <script src="/stat/fine-uploader/fine-uploader.js"></script>
 
     <!-- Fine Uploader Thumbnails template w/ customization
     ====================================================================== -->
@@ -92,35 +77,9 @@
     </script>
 
     <title>mvMapper</title>
-</head>
+{% endblock %}
 
-<body>
-    <!--menu bar-->
-    <div id='cssmenu'>
-    <ul>
-       <li><a href='/'><span>Home</span></a></li>
-       <!--<li class='active has-sub'><a href='#'><span>Products</span></a>-->
-          <!--<ul>-->
-             <!--<li class='has-sub'><a href='#'><span>Product 1</span></a>-->
-                <!--<ul>-->
-                   <!--<li><a href='#'><span>Sub Product</span></a></li>-->
-                   <!--<li class='last'><a href='#'><span>Sub Product</span></a></li>-->
-                <!--</ul>-->
-             <!--</li>-->
-             <!--<li class='has-sub'><a href='#'><span>Product 2</span></a>-->
-                <!--<ul>-->
-                   <!--<li><a href='#'><span>Sub Product</span></a></li>-->
-                   <!--<li class='last'><a href='#'><span>Sub Product</span></a></li>-->
-                <!--</ul>-->
-             <!--</li>-->
-          <!--</ul>-->
-       <!--</li>-->
-       <li><a href='/upload'><span>Upload</span></a></li>
-       <li><a href='/help'><span>Help</span></a></li>
-       <li class='last'><a target="_blank" href='https://github.com/genomeannotation/mvMapper'><span>Github</span></a></li>
-    </ul>
-    </div>
-
+{% block body %}
     <!-- Fine Uploader DOM Element
     ====================================================================== -->
     <div id="uploader"></div>
@@ -136,8 +95,8 @@
             },
             thumbnails: {
                 placeholders: {
-                    waitingPath: '/fine-uploader/placeholders/waiting-generic.png',
-                    notAvailablePath: '/fine-uploader/placeholders/not_available-generic.png'
+                    waitingPath: '/stat/fine-uploader/placeholders/waiting-generic.png',
+                    notAvailablePath: '/stat/fine-uploader/placeholders/not_available-generic.png'
                 }
             },
             debug: true,
@@ -160,5 +119,4 @@
             }
         });
     </script>
-</body>
-</html>
+{% endblock %}
