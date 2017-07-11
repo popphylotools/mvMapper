@@ -51,10 +51,10 @@ out <- export_to_webapp(dapc1,localities)
 write.csv(out, “rosenbergData.csv”, row.names=F)
 ```
 
-Web Use
-=======
+Data Upload
+===========
 
-Once you have a CSV input file, such as the one generated above, it can be uploaded to the web interface via the upload interface at the bottom of the page (either drag and drop, or select through the navigation button). When a file is uploaded, it is assigned a random alphanumeric string, and a link is provided which opens mvMapper with this data. User uploaded data persists on the server for 14 days, and can be returned to using the web address provided in the link.
+Once you have a CSV input file, such as the one generated above, it can be uploaded to the web interface via the upload page (either drag and drop, or hit `select files` button). When a file is uploaded, it is assigned a random alphanumeric string, and a link is provided which opens mvMapper with this data. User uploaded data persists on the server for 14 days, and can be returned to using the web address provided in the link.
 
 Example Data
 ============
