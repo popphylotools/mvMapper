@@ -49,6 +49,8 @@ out <- export_to_webapp(dapc1,localities)
 write.csv(out, “rosenbergData.csv”, row.names=F)
 ```
 
+#### **Note**: `export_to_webapp` is currently available in the devel version of adegenet. For install instructions click [here](https://github.com/thibautjombart/adegenet/wiki/Installing-adegenet-devel)
+
 Web Use
 =======
 
