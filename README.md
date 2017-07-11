@@ -3,7 +3,7 @@ mvMapper
 
 Try a hosted instance of mvMapper [Here](http://ctahr-peps.colo.hawaii.edu/)!
 
-mvMapper (Multivariate Mapper) is an interactive data exploration tool for multivariate analyses with associated geographic location information. Although we developed mvMapper with population genetic data in mind, it will ingest results of virtually any multivariate analysis of georeferenced data. mvMapper’s greatest strength is facilitating dynamic exploration of the statistical and geographic frameworks side-by-side, a task that is difficult and time-consuming to do in static space. It displays a scatterplot with selectors for x-axis, y-axis, point color, point size, and color pallet in addition to a world map with optional jitter to separate overlapping points. Data selections are linked across the two plots, and a data table below shows details of the selected data, which can also be downloaded as a csv.
+**mvMapper** (Multivariate Mapper) is an interactive data exploration tool for multivariate analyses with associated geographic location information. Although we developed mvMapper with population genetic data in mind, it will ingest results of virtually any multivariate analysis of georeferenced data. mvMapper’s greatest strength is facilitating dynamic exploration of the statistical and geographic frameworks side-by-side, a task that is difficult and time-consuming to do in static space. It displays a scatterplot with selectors for x-axis, y-axis, point color, point size, and color pallet in addition to a world map with optional jitter to separate overlapping points. Data selections are linked across the two plots, and a data table below shows details of the selected data, which can also be downloaded as a csv.
 
 Table of contents
 =================
@@ -19,12 +19,12 @@ Table of contents
 Hosted Example
 ==============
 
-A hosted instance of **mvMapper** is available [Here](http://ctahr-peps.colo.hawaii.edu/). See the corresponding [help](http://ctahr-peps.colo.hawaii.edu/help) page for instructions on how to use the web server. **Note**, the web server loads slowly on some internet connections. If all you see is a grey screen and the navigation bar, give it a moment!
-
-A local or custom deployment can be set up using a [Docker container](https://hub.docker.com/r/genomeannotation/mvmapper) or source code available here. The remainder of this Readme page is aimed towards stand-alone deployment. See the [help](http://ctahr-peps.colo.hawaii.edu/help) page for quick and easy web-use, and preparing input data.
+A hosted instance of **mvMapper** is available [Here](http://ctahr-peps.colo.hawaii.edu/). See the corresponding [help](http://ctahr-peps.colo.hawaii.edu/help) page for usage instructions. **Note**, the web app loads slowly on some internet connections. If all you see is a grey screen and the navigation bar, give it a moment!
 
 Input Files
 ===========
+
+See [helpPage.md](webapp/helpPage.md) for an example pipeline using **mvMapper** with **DAPC** in **adegenet**. Note `webapp/helpPage.md` is the source for the help page of the site and can be customized according to your deployment.
 
 The web app uses `webapp/data` and `webapp/config` directories for user provided data and configuration files.
 These files can be selected by adding their file names as optional parameters to the URL following the form:
@@ -60,13 +60,13 @@ On systems which run docker in a virtual machine (such as older windows systems)
 Install
 -------
 
-Once docker is installed, installation of mvMapper is as easy as:
+Once docker is installed, pull the mvMapper container from [our Docker Hub page](https://hub.docker.com/r/genomeannotation/mvmapper):
 
 ```
 docker pull popphylotools/mvmapper
 ```
 
-Building the docker locally from source is relatively easy as well.
+Building the docker locally from source is relatively easy as well:
 
 ```
 git clone https://github.com/popphylotools/mvMapper.git
