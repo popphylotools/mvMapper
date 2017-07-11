@@ -1,0 +1,17 @@
+name: mvmapper
+channels:
+- defaults
+dependencies:
+- bokeh=0.12.4=py36_0
+- colorcet=0.9.1=py36_0
+- pandas=0.19.2=np111py36_1
+- pyproj=1.9.5.1=py36_0
+- python=3.6.0=0
+- pyyaml=3.12=py36_0
+- tornado=4.4.2=py36_0
+- markdown2=2.3.4=py36_0
+- pygments=2.2.0=py36_0
+- pip:
+  - pytoml==0.1.13
+prefix: /opt/conda
+
