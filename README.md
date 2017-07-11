@@ -1,17 +1,15 @@
+[Use mvMapper!](http://ctahr-peps.colo.hawaii.edu/)
+
+-----
+
 mvMapper
 ========
 
-**mvMapper** (Multivariate Mapper) is an interactive data exploration tool for multivariate analyses with associated geographic location information.
-The provided example data set and configuration file demonstrate its use with population genetic data analyzed with discriminant
-analysis of principal components (DAPC) in the R library adegenet. It displays a scatterplot with selectors for x-axis, y-axis,
-point color, point size, and color pallet in addition to a world map with optional jitter to separate stacked points.
-Data selections are linked across the two plots, and a data table below shows details of the selected data, which can also be downloaded as a csv.
-The bottom of the page contains an upload interface for user generated data files.
+mvMapper (Multivariate Mapper) is an interactive data exploration tool for multivariate analyses with associated geographic location information. Although we developed mvMapper with population genetic data in mind, it will ingest results of virtually any multivariate analysis of georeferenced data. mvMapper’s greatest strength is facilitating dynamic exploration of the statistical and geographic frameworks side-by-side, a task that is difficult and time-consuming to do in static space. It displays a scatterplot with selectors for x-axis, y-axis, point color, point size, and color pallet in addition to a world map with optional jitter to separate overlapping points. Data selections are linked across the two plots, and a data table below shows details of the selected data, which can also be downloaded as a csv.
 
-Pipeline
-========
+mvMapper is available as a [hosted web server](http://ctahr-peps.colo.hawaii.edu/). See the [help](http://ctahr-peps.colo.hawaii.edu/help) page for instructions on how to use the web server. **Note**, the web server loads slowly on some internet connections. If all you see is a grey screen and the navigation bar, give it a moment!
 
-See [helpPage.md](webapp/helpPage.md) for an example pipeline using **mvMapper** with **DAPC** in **adegenet**.
+A local or custom deployment can be set up using a [Docker container](https://hub.docker.com/r/genomeannotation/mvmapper) or source code available here. The remainder of this Readme page is aimed towards stand-alone deployment. See the [help](http://ctahr-peps.colo.hawaii.edu/help) page for quick and easy web-use, and preparing input data.
 
 Input Files
 ===========
