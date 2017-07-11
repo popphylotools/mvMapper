@@ -5,17 +5,13 @@ Multivariate Mapper
 
 The input format is a simple comma-delimited tabular file (.CSV) that can either be assembled manually, or generated using mvMapper’s input generation function in the adegenet library (export_to_webapp). This function currently supports multivariate analyses conducted in adegenet and those based on the duality diagram (dudi. functions) in ade4, including principal components analysis (regular and spatial varieties), discriminant analysis of principal components, principal coordinates analysis, non-metric dimensional scaling, and correspondence analysis.
 
-Below, we provide an example of a general workflow (data preparation), and usage instructions for the web interface of mvMapper.  All example files can be found on our GitHub page under the (dataPrepExampleFiles)[https://github.com/popphylotools/mvMapper/tree/master/dataPrepExampleFiles] directory.
+Below, we provide an example of a general workflow (data preparation), and usage instructions for the web interface of mvMapper.  All example files can be found on our GitHub page under the [dataPrepExampleFiles](https://github.com/popphylotools/mvMapper/tree/master/dataPrepExampleFiles) directory.
 
 General Workflow: Data Prep
 ===========================
 
 Here we show an example pipeline using **mvMapper** with **DAPC** in **adegenet**.
 For more details on the DAPC, see its [tutorial](https://github.com/thibautjombart/adegenet/raw/master/tutorials/tutorial-dapc.pdf).
-
-Example data (783 autosomal microsatellite loci genotyped for 1048 individuals from 53 populations) from
-Rosenberg NA, Mahajan S, Ramachandran S, Zhao C, Pritchard JK, Feldman MW (2005) Clines, clusters, and the effect of study design on the inference of human population structure. PLoS Genetics 1:660-671.
-Available from <https://rosenberglab.stanford.edu/diversity.html>
 
 The `export_to_webapp` function in adegenet combines data from commonly-used multivariate analyses with
 location information and supplementary data. The resulting data structure can be easily output as a CSV which is taken as input to our web app. At a minimum, the input to mvMapper must include three columns: `key` (individual identifiers),
@@ -54,7 +50,7 @@ write.csv(out, “rosenbergData.csv”, row.names=F)
 Web Use
 =======
 
-Once you have a CSV input file, such as the one generated above, it can be uploaded to the web interface via the upload interface at the bottom of the page (either drag and drop, or select through the navigation button). When a file is uploaded, it is assigned a random alphanumeric string, and a link is provided to the mvMapper instance for that datafile. This instance is saved on the web server for 14 days, and can be returned to using the web address provided in the link.
+Once you have a CSV input file, such as the one generated above, it can be uploaded to the web interface via the upload interface at the bottom of the page (either drag and drop, or select through the navigation button). When a file is uploaded, it is assigned a random alphanumeric string, and a link is provided which opens mvMapper with this data. User uploaded data persists on the server for 14 days, and can be returned to using the web address provided in the link.
 
 Example Data
 ============
