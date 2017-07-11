@@ -1,8 +1,6 @@
 [Use mvMapper!](http://ctahr-peps.colo.hawaii.edu/)
 ===============
 
------
-
 mvMapper
 ========
 
