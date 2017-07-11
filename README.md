@@ -47,7 +47,7 @@ Note that `easting` and `northing` are reserved column names used internally, so
 Configuration
 -------------
 
-The provided `defaultConfig.toml` config file sets the webapp up for use with the results from a DAPC analysis.
+The provided `defaultConfig.toml` config file sets the webapp up for use with the results from a DAPC.
 All available options are documented as comments, please follow it as an example to create custom config files.
 
 Run Using Docker
@@ -66,7 +66,7 @@ Once docker is installed, pull the mvMapper container from [our Docker Hub page]
 docker pull popphylotools/mvmapper
 ```
 
-Building the docker locally from source is relatively easy as well:
+Building the Docker locally from source is relatively easy as well:
 
 ```
 git clone https://github.com/popphylotools/mvMapper.git
@@ -78,7 +78,7 @@ Serve
 -----
 
 For local access, by default, the webapp can be accessed at `localhost:5006`.
-Simply run the mvMapper docker in demon mode and forward port 5006 to the host:
+Simply run the mvMapper Docker in demon mode and forward port 5006 to the host:
 
 ```
 docker run -d \
@@ -87,7 +87,7 @@ popphylotools/mvmapper:latest
 ```
 
 If data and config directories are to be managed from the host, host directories can be mounted in place of the containers data and config volumes.
-Note that `rosenbergData.csv` (or whatever you have configured as the default data file) should be placed in the data directory as host directories will not have files automatically copied into them during docker set up.
+Note that `rosenbergData.csv` (or whatever you have configured as the default data file) should be placed in the data directory as host directories will not have files automatically copied into them during Docker set up.
 
 ```
 docker run -d \
@@ -123,7 +123,7 @@ whereas data files added manually should be given the extension `.csv` and will 
 Run Without Docker
 ==================
 
-When running mvMapper on systems which do not support docker, the `Dockerfile` can be followed as a guide.
+When running mvMapper on systems which do not support Docker, the `Dockerfile` can be followed as a guide.
 
 Install
 -------
