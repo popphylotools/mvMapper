@@ -32,7 +32,7 @@ Note that `easting` and `northing` are reserved column names used internally, so
 In the following example, we conduct DAPC and create an R object called `dapc1`.
 We then read in locality information from `localities.csv`, and combine the two using the `export_to_webapp` function before writing `rosenbergData.csv`, which is the input file for mvMapper.
 This localities file can include additional columns of information that will be ingested and displayed within the web app (e.g. host, sex, morphological characteristics).
-The resulting CSV file can be uploaded through the web app's upload interface, or configured as the default data file when running a custom mvMapper server (see install instructions on our (GitHub)[https://github.com/popphylotools/mvMapper]).
+The resulting CSV file can be uploaded through the web app's upload interface, or configured as the default data file when running a custom mvMapper server (see install instructions on our [GitHub](https://github.com/popphylotools/mvMapper)).
 
 ```r
 # An example using the microsatellite dataset of Rosenberg et al. 2005
