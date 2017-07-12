@@ -50,22 +50,27 @@ class IndexHandler(RequestHandler):
 
 class POSTHandler(tornado.web.RequestHandler):
     def post(self):
-        excepted_type = ['text/csv']
+        accepted_type = {"application/csv", "application/x-csv", "text/csv", "text/comma-separated-values",
+                         "text/x-comma-separated-values", "text/tab-separated-values", "text/plain",
+                         "text/x-csv", "application/vnd.ms-excel"}
         response_to_send = {"success": False}
         for field_name, files in self.request.files.items():
             for info in files:
                 filename, content_type = info.get("qqfilename") or info['filename'], info['content_type']
                 body = info['body']
+
                 new_filename = str(uuid.uuid4().hex)
                 response_to_send["newUuid"] = new_filename
 
-                if content_type in excepted_type:
+                print(content_type)
+                if content_type in accepted_type:
                     try:
                         outfile = open("data/" + new_filename, 'wb')
                         outfile.write(body)
                     except Exception as e:
                         response_to_send["success"] = False
-                        response_to_send["error"] = str(e)
+                        response_to_send["error"] = "Oops, that wasn't supposed to happen. This is bad."
+                        print(str(e))
                     else:
                         response_to_send["success"] = True
                         response_to_send["linkArguments"] = "?d={}".format(new_filename)
@@ -73,7 +78,8 @@ class POSTHandler(tornado.web.RequestHandler):
                         outfile.close()
                 else:
                     response_to_send["success"] = False
-                    response_to_send["error"] = "content_type {} not in excepted_type {}".format(content_type, excepted_type)
+                    response_to_send["error"] = "content_type {} not in accepted_type {}".format(content_type, accepted_type)
+
         print(json.dumps(response_to_send))
         self.write(json.dumps(response_to_send))
 
