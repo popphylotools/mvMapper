@@ -16,6 +16,9 @@ import tornado
 import json
 
 import sys
+import io
+
+import pandas
 
 import markdown2
 
@@ -50,35 +53,34 @@ class IndexHandler(RequestHandler):
 
 class POSTHandler(tornado.web.RequestHandler):
     def post(self):
-        accepted_type = {"application/csv", "application/x-csv", "text/csv", "text/comma-separated-values",
-                         "text/x-comma-separated-values", "text/tab-separated-values", "text/plain",
-                         "text/x-csv", "application/vnd.ms-excel"}
         response_to_send = {"success": False}
         for field_name, files in self.request.files.items():
-            for info in files:
-                filename, content_type = info.get("qqfilename") or info['filename'], info['content_type']
-                body = info['body']
+            for file_data in files:
+                filename, content_type = file_data.get("qqfilename") or file_data.get('filename'), file_data.get('content_type')
+                body = file_data['body']
 
                 new_filename = str(uuid.uuid4().hex)
                 response_to_send["newUuid"] = new_filename
 
-                print(content_type)
-                if content_type in accepted_type:
+                # validation
+                if ".csv" in filename:
                     try:
-                        outfile = open("data/" + new_filename, 'wb')
-                        outfile.write(body)
+                        df = pandas.read_csv(io.BytesIO(body))
                     except Exception as e:
                         response_to_send["success"] = False
-                        response_to_send["error"] = "Oops, that wasn't supposed to happen. This is bad."
+                        response_to_send["error"] = "Failed to parse uploaded data."
                         print(str(e))
                     else:
-                        response_to_send["success"] = True
-                        response_to_send["linkArguments"] = "?d={}".format(new_filename)
-                    finally:
-                        outfile.close()
+                        columns = set(df.columns)
+                        if {"key", "lat", "lon"}.issubset(columns):
+                            df.to_csv("data/" + new_filename, header=True, index=False)
+                            response_to_send["success"] = True
+                        else:
+                            response_to_send["success"] = False
+                            response_to_send["error"] = 'Ensure that "key", "lat", and "lon" columns exist.'
                 else:
                     response_to_send["success"] = False
-                    response_to_send["error"] = "content_type {} not in accepted_type {}".format(content_type, accepted_type)
+                    response_to_send["error"] = 'Only .csv extension allowed.'
 
         print(json.dumps(response_to_send))
         self.write(json.dumps(response_to_send))

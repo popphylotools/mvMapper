@@ -109,13 +109,13 @@
             },
             callbacks: {
                 onComplete: function(id, name, response) {
-                    var linkArguments = response.linkArguments,
+                    var newUuid = response.newUuid,
                         fileItem = this.getItemByFileId(id);
 
                     if (response.success) {
                         var viewBtn = qq(fileItem).getByClass("btn-info")[0];
 
-                        viewBtn.setAttribute("href", "/" + linkArguments);
+                        viewBtn.setAttribute("href", "/?d=" + newUuid);
                         qq(viewBtn).removeClass("qq-hide");
                     }
                 },
