@@ -11,6 +11,6 @@ Try a hosted instance of mvMapper **[Here](http://ctahr-peps.colo.hawaii.edu/)!*
 
 A hosted instance of **mvMapper** is available [Here](http://ctahr-peps.colo.hawaii.edu/). See the corresponding [help](http://ctahr-peps.colo.hawaii.edu/help) page for usage instructions. **Note**, the web app loads slowly on some internet connections. If all you see is a grey screen and the navigation bar, give it a moment!
 
-### Stand-alone version
+### Stand-alone Use
 
 **mvMapper** is also deployable from source code or a Docker container. Details can be found [Here](https://github.com/popphylotools/mvMapper)
