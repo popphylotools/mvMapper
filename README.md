@@ -1,6 +1,9 @@
 Try a hosted instance of mvMapper **[Here](http://ctahr-peps.colo.hawaii.edu/)!**
  
-![mvMapper](ScreenShot.png)
+![Data from: Rosenberg et al. 2005 Plos Genetics 1:660-671](gh-pages_screenshot1_cropped.png)
+ 
+![Data from: Dupuis & Sperling 2016 J Evol Biol 29:1932-1951](gh-pages_screenshot2_cropped.png)
+
 
 mvMapper
 ========
