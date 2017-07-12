@@ -64,7 +64,10 @@ class POSTHandler(tornado.web.RequestHandler):
                         outfile.write(body)
                     response_to_send["success"] = True
                     response_to_send["linkArguments"] = "?d={}".format(new_filename)
-
+                else:
+                    response_to_send["success"] = False
+                    response_to_send["error"] = "content_type {} not in excepted_type {}".format(content_type, excepted_type)
+        print(json.dumps(response_to_send))
         self.write(json.dumps(response_to_send))
 
 class helpHandler(tornado.web.RequestHandler):
