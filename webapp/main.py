@@ -60,10 +60,17 @@ class POSTHandler(tornado.web.RequestHandler):
                 response_to_send["newUuid"] = new_filename
 
                 if content_type in excepted_type:
-                    with open("data/" + new_filename, 'wb') as outfile:
+                    try:
+                        outfile = open("data/" + new_filename, 'wb')
                         outfile.write(body)
-                    response_to_send["success"] = True
-                    response_to_send["linkArguments"] = "?d={}".format(new_filename)
+                    except Exception as e:
+                        response_to_send["success"] = False
+                        response_to_send["error"] = str(e)
+                    else:
+                        response_to_send["success"] = True
+                        response_to_send["linkArguments"] = "?d={}".format(new_filename)
+                    finally:
+                        outfile.close()
                 else:
                     response_to_send["success"] = False
                     response_to_send["error"] = "content_type {} not in excepted_type {}".format(content_type, excepted_type)
