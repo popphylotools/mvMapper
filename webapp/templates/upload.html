@@ -118,6 +118,9 @@
                         viewBtn.setAttribute("href", "/" + linkArguments);
                         qq(viewBtn).removeClass("qq-hide");
                     }
+                },
+                onError: function(id, name, errorReason, xhrOrXdr) {
+                    alert(qq.format("Error on file number {} - {}.  Reason: {}", id, name, errorReason));
                 }
             }
         });
