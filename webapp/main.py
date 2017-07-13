@@ -108,7 +108,8 @@ server = bkServer({'/bkapp': bokeh_app}, io_loop=io_loop, host=appAddress, port=
                                   (r'/help', helpHandler),
                                   (r'/upload', uploadPageHandler),
                                   (r'/server/upload', POSTHandler),
-                                  (r'/stat/(.*)', StaticFileHandler, {'path': "stat"})
+                                  (r'/stat/(.*)', StaticFileHandler, {'path': "stat"}),
+                                  (r'/(favicon.ico)', StaticFileHandler, {"path": ""})
                                   ])
 server.start()
 
