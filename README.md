@@ -6,6 +6,8 @@ Try a hosted instance of mvMapper **[Here](http://ctahr-peps.colo.hawaii.edu/)!*
 
 **mvMapper** (Multivariate Mapper) is an interactive data exploration tool for multivariate analyses with associated geographic location information. Although we developed mvMapper with population genetic data in mind, it will ingest results of virtually any multivariate analysis of georeferenced data. mvMapper’s greatest strength is facilitating dynamic exploration of the statistical and geographic frameworks side-by-side, a task that is difficult and time-consuming to do in static space. It displays a scatterplot with selectors for x-axis, y-axis, point color, point size, and color pallet in addition to a world map with optional jitter to separate overlapping points. Data selections are linked across the two plots, and a data table below shows details of the selected data, which can also be downloaded as a csv.
 
+Back to the mvMapper [project page](https://popphylotools.github.io/mvMapper/)
+
 Table of contents
 =================
 
@@ -61,7 +63,7 @@ On systems which run docker in a virtual machine (such as older windows systems)
 Install
 -------
 
-Once docker is installed, pull the mvMapper container from [our Docker Hub page](https://hub.docker.com/r/genomeannotation/mvmapper):
+Once docker is installed, pull the mvMapper container from [our Docker Hub page](https://hub.docker.com/r/popphylotools/mvmapper/):
 
 ```
 docker pull popphylotools/mvmapper
