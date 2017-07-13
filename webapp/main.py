@@ -22,6 +22,30 @@ import pandas
 
 import markdown2
 
+import os
+import logging
+
+class OneLineExceptionFormatter(logging.Formatter):
+    def formatException(self, exc_info):
+        result = super().formatException(exc_info)
+        return repr(result)
+
+    def format(self, record):
+        result = super().format(record)
+        if record.exc_text:
+            result = result.replace("n", "")
+        return result
+
+
+handler = logging.StreamHandler()
+formatter = OneLineExceptionFormatter(logging.BASIC_FORMAT)
+handler.setFormatter(formatter)
+root = logging.getLogger()
+root.setLevel(os.environ.get("LOGLEVEL", "INFO"))
+root.addHandler(handler)
+
+log = logging.getLogger("mvMapper")
+
 env = Environment(loader=FileSystemLoader('templates'))
 
 appAddress = [element.strip() for element in sys.argv[1].split(',')]
@@ -69,7 +93,7 @@ class POSTHandler(tornado.web.RequestHandler):
                     except Exception as e:
                         response_to_send["success"] = False
                         response_to_send["error"] = "Failed to parse uploaded data."
-                        print(str(e))
+                        log.error(str(e))
                     else:
                         columns = set(df.columns)
                         if {"key", "lat", "lon"}.issubset(columns):
@@ -82,7 +106,7 @@ class POSTHandler(tornado.web.RequestHandler):
                     response_to_send["success"] = False
                     response_to_send["error"] = 'Only .csv extension allowed.'
 
-        print(json.dumps(response_to_send))
+        log.info(json.dumps(response_to_send))
         self.write(json.dumps(response_to_send))
 
 class helpHandler(tornado.web.RequestHandler):
@@ -100,18 +124,25 @@ class uploadPageHandler(tornado.web.RequestHandler):
     def get(self):
         self.write(env.get_template('upload.html').render())
 
-bokeh_app = bkApplication(bkFunctionHandler(modify_doc))
+def main():
+    bokeh_app = bkApplication(bkFunctionHandler(modify_doc))
 
-io_loop = IOLoop.current()
-server = bkServer({'/bkapp': bokeh_app}, io_loop=io_loop, host=appAddress, port=appPort,
-                  extra_patterns=[('/', IndexHandler),
-                                  (r'/help', helpHandler),
-                                  (r'/upload', uploadPageHandler),
-                                  (r'/server/upload', POSTHandler),
-                                  (r'/stat/(.*)', StaticFileHandler, {'path': "stat"}),
-                                  (r'/(favicon.ico)', StaticFileHandler, {"path": ""})
-                                  ])
-server.start()
+    io_loop = IOLoop.current()
+    server = bkServer({'/bkapp': bokeh_app}, io_loop=io_loop, host=appAddress, port=appPort,
+                      extra_patterns=[('/', IndexHandler),
+                                      (r'/help', helpHandler),
+                                      (r'/upload', uploadPageHandler),
+                                      (r'/server/upload', POSTHandler),
+                                      (r'/stat/(.*)', StaticFileHandler, {'path': "stat"}),
+                                      (r'/(favicon.ico)', StaticFileHandler, {"path": ""})
+                                      ])
+    server.start()
 
-if __name__ == '__main__':
-    io_loop.start()
+    if __name__ == '__main__':
+        io_loop.start()
+
+try:
+    exit(main())
+except Exception:
+    logging.exception("Exception in main(): {}")
+    exit(1)

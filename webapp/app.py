@@ -17,6 +17,8 @@ from bokeh.tile_providers import STAMEN_TERRAIN
 import tornado
 import tornado.escape
 
+import logging
+log = logging.getLogger(__name__)
 
 def modify_doc(doc):
     SIZES = list(range(6, 22, 3))
@@ -251,12 +253,12 @@ def modify_doc(doc):
         config = pytoml.load(toml_data)
 
     # load data file
-    try:
+    if 'd' in args:
         dataPath = tornado.escape.url_unescape(args.get('d')[0])
         dataPath = "".join(c for c in dataPath if c.isalnum() or (c in ".-_"))  # insure filename is safe
         dataPath = "data/" + dataPath
-    except:
-        dataPath = config.get("defaultDataPath", "data/rosenbergData.csv")
+    else:
+        dataPath = config.get("defaultDataPath")
 
     df = get_data(dataPath, config.get("force_discrete_colorable", []))
 
