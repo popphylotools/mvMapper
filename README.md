@@ -63,7 +63,7 @@ On systems which run docker in a virtual machine (such as older windows systems)
 Install
 -------
 
-Once docker is installed, pull the mvMapper container from [our Docker Hub page](https://hub.docker.com/r/genomeannotation/mvmapper):
+Once docker is installed, pull the mvMapper container from [our Docker Hub page](https://hub.docker.com/r/popphylotools/mvmapper/):
 
 ```
 docker pull popphylotools/mvmapper
