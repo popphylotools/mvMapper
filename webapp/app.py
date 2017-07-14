@@ -17,6 +17,7 @@ from bokeh.tile_providers import STAMEN_TERRAIN
 import tornado
 import tornado.escape
 
+import os
 import logging
 log = logging.getLogger(__name__)
 
@@ -34,7 +35,10 @@ def modify_doc(doc):
 
     def get_data(path, force_discrete_colorable):
         """Read data from csv and transform map coordinates."""
-        data = pd.read_csv(path)
+        try:
+            data = pd.read_csv(path)
+        except FileNotFoundError:
+            log.error("No such data file was found.")
 
         # data from columns in force_discrete_colorable will be treated as discrete even if numeric
         for col in data.columns:
@@ -240,23 +244,51 @@ def modify_doc(doc):
     # get user config and data paths from session arguments
     args = doc.session_context.request.arguments
 
-    # load config file
-    try:
+    # validate config parameter
+    if 'c' in args:
         configPath = tornado.escape.url_unescape(args.get('c')[0])
-        configPath = "".join(c for c in configPath if c.isalnum() or (c in ".-_"))  # insure filename is safe
-        configPath = "config/" + configPath
-    except:
+        # check that file name is valid
+        cleanName = "".join(c for c in configPath if c.isalnum() or (c in ".-_"))  # insure filename is safe
+        if cleanName != configPath:
+            # emit error, load error page: invalid character(s) in config parameter
+            message = "Invalid character(s) in config parameter: {}".format(configPath)
+            log.info(message)
+            raise ValueError(message)
+        # check that file exists
+        elif not os.path.isfile("data/" + configPath):
+            # emit error, load error page: no such config file found
+            message = "No such config file found: {}".format(configPath)
+            log.info(message)
+            raise FileNotFoundError(message)
+        # valid name and file exists, therefore pass argument
+        else:
+            configPath = "config/" + configPath
+    else:
         configPath = "defaultConfig.toml"
 
     # load config file
     with open(configPath) as toml_data:
         config = pytoml.load(toml_data)
 
-    # load data file
+    # validate data parameter
     if 'd' in args:
         dataPath = tornado.escape.url_unescape(args.get('d')[0])
-        dataPath = "".join(c for c in dataPath if c.isalnum() or (c in ".-_"))  # insure filename is safe
-        dataPath = "data/" + dataPath
+        # check that file name is valid
+        cleanName = "".join(c for c in userData if c.isalnum() or (c in ".-_"))  # insure filename is safe
+        if cleanName != userData:
+            # emit error, load error page: invalid character(s) in data parameter
+            message = "Invalid character(s) in data parameter: {}".format(userData)
+            log.info(message)
+            raise ValueError(message)
+        # check that file exists
+        elif not os.path.isfile("data/" + userData):
+            # emit error, load error page: no such data file found
+            message = "No such data file found: {}".format(userData)
+            log.info(message)
+            raise FileNotFoundError(message)
+        # valid name and file exists, therefore pass argument
+        else:
+            dataPath = "data/" + dataPath
     else:
         dataPath = config.get("defaultDataPath")
 

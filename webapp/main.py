@@ -25,6 +25,7 @@ import markdown2
 import os
 import logging
 
+# logging configuration
 class OneLineExceptionFormatter(logging.Formatter):
     def formatException(self, exc_info):
         result = super().formatException(exc_info)
@@ -33,7 +34,7 @@ class OneLineExceptionFormatter(logging.Formatter):
     def format(self, record):
         result = super().format(record)
         if record.exc_text:
-            result = result.replace("n", "")
+            result = result.replace(r"\n", "")
         return result
 
 
@@ -47,32 +48,80 @@ root.addHandler(handler)
 log = logging.getLogger("mvMapper")
 
 env = Environment(loader=FileSystemLoader('templates'))
-
 appAddress = [element.strip() for element in sys.argv[1].split(',')]
 appPort = int(sys.argv[2])
 
 
 class IndexHandler(RequestHandler):
     def get(self):
-        template = env.get_template('embed.html')
-        script = bk_autoload_server(model=None, url='/bkapp')
 
-        arguments = {}
-        userConfig = self.get_argument("c", default="None")
-        if userConfig is not "None":
-            arguments["c"] = userConfig
-        userData = self.get_argument("d", default="None")
-        if userData is not "None":
-            arguments["d"] = userData
+        # validate and foreword parameters
+        try:
+            parameters = {}
 
-        script_list = script.split("\n")
-        script_list[2] = script_list[2][:-1]
-        for key in arguments.keys():
-            script_list[2] += "&{}={}".format(key, arguments[key])
-        script_list[2] += '"'
-        script = "\n".join(script_list)
+            # validate config parameter
+            userConfig = self.get_argument("c", default="None")
+            if userConfig != "None":
+                # check that file name is valid
+                cleanName = "".join(c for c in userConfig if c.isalnum() or (c in ".-_"))  # insure filename is safe
+                if cleanName != userConfig:
+                    # emit error, load error page: invalid character(s) in config parameter
+                    message = "Invalid character(s) in config parameter: {}".format(userConfig)
+                    log.info(message)
+                    raise ValueError(message)
+                # check that file exists
+                elif not os.path.isfile("data/" + userConfig):
+                    # emit error, load error page: no such config file found
+                    message = "No such config file found: {}".format(userConfig)
+                    log.info(message)
+                    raise FileNotFoundError(message)
+                # valid name and file exists, therefore pass argument
+                else:
+                    parameters["c"] = userConfig
 
-        self.write(template.render(script=script, template="Tornado"))
+            # validate data parameter
+            userData = self.get_argument("d", default="None")
+            if userData != "None":
+                # check that file name is valid
+                cleanName = "".join(c for c in userData if c.isalnum() or (c in ".-_"))  # insure filename is safe
+                if cleanName != userData:
+                    # emit error, load error page: invalid character(s) in data parameter
+                    message = "Invalid character(s) in data parameter: {}".format(userData)
+                    log.info(message)
+                    raise ValueError(message)
+                # check that file exists
+                elif not os.path.isfile("data/" + userData):
+                    # emit error, load error page: no such data file found
+                    message = "No such data file found: {}".format(userData)
+                    log.info(message)
+                    raise FileNotFoundError(message)
+                # valid name and file exists, therefore pass argument
+                else:
+                    parameters["d"] = userData
+
+        except ValueError as e:
+            template = env.get_template('error.html')
+            self.write(template.render(message=e))
+
+        except FileNotFoundError as e:
+            template = env.get_template('error.html')
+            self.write(template.render(message=e))
+
+        else:
+            # load template and script
+            template = env.get_template('embed.html')
+            script = bk_autoload_server(model=None, url='/bkapp')
+
+            # insert parameters into script
+            script_list = script.split("\n")
+            script_list[2] = script_list[2][:-1]
+            for key in parameters.keys():
+                script_list[2] += "&{}={}".format(key, parameters[key])
+            script_list[2] += '"'
+            script = "\n".join(script_list)
+
+            # return bokeh app
+            self.write(template.render(script=script))
 
 
 class POSTHandler(tornado.web.RequestHandler):
