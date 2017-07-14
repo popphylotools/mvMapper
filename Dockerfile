@@ -26,4 +26,4 @@ ENV APP_URL localhost
 ENV APP_PORT 5006
 ENV DAYS_TO_KEEP_DATA 0 # zero keeps data forever. only filenames with no extension are affected by cron
 
-CMD ["source activate mvmapper && python main.py ${APP_URL}:${APP_PORT} 5006"]
+CMD ["source activate mvmapper && python main.py --host ${APP_URL}:${APP_PORT} --port 5006"]

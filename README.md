@@ -148,7 +148,7 @@ To run mvMapper, activate the conda env, then run main.py with the appropriate p
 
 ```
 source activate mvmapper
-python webapp/main.py <url_at_which_app_will_be_accessed>:<port_at_which_app_will_be_accessed> <port_at_which_app_will_be_accessed>
+python webapp/main.py --host <url_at_which_app_will_be_accessed>:<port_at_which_app_will_be_accessed> --port <port_at_which_app_will_be_accessed>
 ```
 
 For local access for instance, the final command will be `python main.py localhost:5006 5006`
