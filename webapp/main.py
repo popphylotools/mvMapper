@@ -69,7 +69,7 @@ class IndexHandler(RequestHandler):
                     log.info(message)
                     raise ValueError(message)
                 # check that file exists
-                elif not os.path.isfile("data/" + userConfig):
+                elif not os.path.isfile("config/" + userConfig):
                     # emit error, load error page: no such config file found
                     message = "No such config file found: {}".format(userConfig)
                     log.info(message)

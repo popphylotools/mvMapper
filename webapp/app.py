@@ -252,7 +252,7 @@ def modify_doc(doc):
             log.info(message)
             raise ValueError(message)
         # check that file exists
-        elif not os.path.isfile("data/" + configPath):
+        elif not os.path.isfile("config/" + configPath):
             # emit error, load error page: no such config file found
             message = "No such config file found: {}".format(configPath)
             log.info(message)
