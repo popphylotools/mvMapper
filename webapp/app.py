@@ -35,10 +35,7 @@ def modify_doc(doc):
 
     def get_data(path, force_discrete_colorable):
         """Read data from csv and transform map coordinates."""
-        try:
-            data = pd.read_csv(path)
-        except FileNotFoundError:
-            log.error("No such data file was found.")
+        data = pd.read_csv(path)
 
         # data from columns in force_discrete_colorable will be treated as discrete even if numeric
         for col in data.columns:
@@ -274,16 +271,16 @@ def modify_doc(doc):
     if 'd' in args:
         dataPath = tornado.escape.url_unescape(args.get('d')[0])
         # check that file name is valid
-        cleanName = "".join(c for c in userData if c.isalnum() or (c in ".-_"))  # insure filename is safe
-        if cleanName != userData:
+        cleanName = "".join(c for c in dataPath if c.isalnum() or (c in ".-_"))  # insure filename is safe
+        if cleanName != dataPath:
             # emit error, load error page: invalid character(s) in data parameter
-            message = "Invalid character(s) in data parameter: {}".format(userData)
+            message = "Invalid character(s) in data parameter: {}".format(dataPath)
             log.info(message)
             raise ValueError(message)
         # check that file exists
-        elif not os.path.isfile("data/" + userData):
+        elif not os.path.isfile("data/" + dataPath):
             # emit error, load error page: no such data file found
-            message = "No such data file found: {}".format(userData)
+            message = "No such data file found: {}".format(dataPath)
             log.info(message)
             raise FileNotFoundError(message)
         # valid name and file exists, therefore pass argument
