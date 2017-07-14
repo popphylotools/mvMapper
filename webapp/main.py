@@ -1,31 +1,24 @@
-from jinja2 import Environment, FileSystemLoader
+import argparse
+import io
+import json
+import logging
+import os
+import uuid
 
-from tornado.ioloop import IOLoop
-from tornado.web import RequestHandler, StaticFileHandler
-
+import markdown2
+import pandas
+import pytoml
+import tornado
+# noinspection PyUnresolvedReferences
+from app import modify_doc
 from bokeh.application import Application as bkApplication
 from bokeh.application.handlers import FunctionHandler as bkFunctionHandler
 from bokeh.embed import autoload_server as bk_autoload_server
 from bokeh.server.server import Server as bkServer
+from jinja2 import Environment, FileSystemLoader
+from tornado.ioloop import IOLoop
+from tornado.web import RequestHandler, StaticFileHandler
 
-# noinspection PyUnresolvedReferences
-from app import modify_doc
-
-import uuid
-import tornado
-import json
-
-import sys
-import io
-
-import pandas
-
-import markdown2
-
-import os
-import logging
-
-import argparse
 
 # logging configuration
 class OneLineExceptionFormatter(logging.Formatter):
@@ -50,6 +43,7 @@ root.addHandler(handler)
 log = logging.getLogger("mvMapper")
 
 env = Environment(loader=FileSystemLoader('templates'))
+
 
 class IndexHandler(RequestHandler):
     def get(self):
@@ -98,6 +92,22 @@ class IndexHandler(RequestHandler):
                 else:
                     parameters["d"] = userData
 
+            # special case where user config is given without valid defaultDataPath and userData isn't passed to URL
+            if userConfig != "None" and userData == "None":
+                # load config file
+                with open("config/" + userConfig) as toml_data:
+                    config = pytoml.load(toml_data)
+                if "defaultDataPath" in config:
+                    dataPath = config.get("defaultDataPath")
+                else:
+                    raise ValueError(
+                        'Config file "{}" has no "defaultDataPath" parameter, and no "d=" parameter was passed in the URL.'.format(
+                            userConfig))
+                if not os.path.isfile(dataPath):
+                    raise FileNotFoundError(
+                        'No such data file exists: "defaultDataPath" parameter "{}" passed in config file "{}".'.format(
+                            dataPath, userConfig))
+
         except ValueError as e:
             template = env.get_template('error.html')
             self.write(template.render(message=e))
@@ -128,7 +138,8 @@ class POSTHandler(tornado.web.RequestHandler):
         response_to_send = {"success": False}
         for field_name, files in self.request.files.items():
             for file_data in files:
-                filename, content_type = file_data.get("qqfilename") or file_data.get('filename'), file_data.get('content_type')
+                filename, content_type = file_data.get("qqfilename") or file_data.get('filename'), file_data.get(
+                    'content_type')
                 body = file_data['body']
 
                 new_filename = str(uuid.uuid4().hex)
@@ -157,6 +168,7 @@ class POSTHandler(tornado.web.RequestHandler):
         log.info(json.dumps(response_to_send))
         self.write(json.dumps(response_to_send))
 
+
 class helpHandler(tornado.web.RequestHandler):
     def get(self):
         template = env.get_template('help.html')
@@ -168,9 +180,11 @@ class helpHandler(tornado.web.RequestHandler):
                                                                             'tables']))
         self.write(rendered)
 
+
 class uploadPageHandler(tornado.web.RequestHandler):
     def get(self):
         self.write(env.get_template('upload.html').render())
+
 
 def main():
     parser = argparse.ArgumentParser(description='Run mvMapper server.')
@@ -193,6 +207,7 @@ def main():
 
     if __name__ == '__main__':
         io_loop.start()
+
 
 try:
     exit(main())

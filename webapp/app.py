@@ -1,25 +1,25 @@
-import yaml
-from bokeh.themes import Theme
-
 import copy
 import json
-import pytoml
+import logging
+import os
 
 import colorcet as cc
 import pandas as pd
 import pyproj
+import pytoml
+import tornado
+import tornado.escape
+import yaml
 from bokeh.layouts import row, widgetbox, layout
 from bokeh.models import Select, CustomJS, Jitter, DataTable, TableColumn, Slider, Button
 # noinspection PyUnresolvedReferences
 from bokeh.palettes import linear_palette
 from bokeh.plotting import figure, ColumnDataSource
+from bokeh.themes import Theme
 from bokeh.tile_providers import STAMEN_TERRAIN
-import tornado
-import tornado.escape
 
-import os
-import logging
 log = logging.getLogger(__name__)
+
 
 def modify_doc(doc):
     SIZES = list(range(6, 22, 3))
@@ -288,6 +288,9 @@ def modify_doc(doc):
             dataPath = "data/" + dataPath
     else:
         dataPath = config.get("defaultDataPath")
+        if not os.path.isfile(dataPath):
+            message = 'defaultDataPath "{}" from config file "{}" does not point to a file'.format(dataPath, configPath)
+            raise FileNotFoundError(message)
 
     df = get_data(dataPath, config.get("force_discrete_colorable", []))
 
