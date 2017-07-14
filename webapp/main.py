@@ -25,6 +25,8 @@ import markdown2
 import os
 import logging
 
+import argparse
+
 # logging configuration
 class OneLineExceptionFormatter(logging.Formatter):
     def formatException(self, exc_info):
@@ -48,9 +50,6 @@ root.addHandler(handler)
 log = logging.getLogger("mvMapper")
 
 env = Environment(loader=FileSystemLoader('templates'))
-appAddress = [element.strip() for element in sys.argv[1].split(',')]
-appPort = int(sys.argv[2])
-
 
 class IndexHandler(RequestHandler):
     def get(self):
@@ -174,10 +173,15 @@ class uploadPageHandler(tornado.web.RequestHandler):
         self.write(env.get_template('upload.html').render())
 
 def main():
+    parser = argparse.ArgumentParser(description='Run mvMapper server.')
+    parser.add_argument('--host', type=str, nargs='+', required=True)
+    parser.add_argument('--port', type=int, required=True)
+    args = parser.parse_args()
+
     bokeh_app = bkApplication(bkFunctionHandler(modify_doc))
 
     io_loop = IOLoop.current()
-    server = bkServer({'/bkapp': bokeh_app}, io_loop=io_loop, host=appAddress, port=appPort,
+    server = bkServer({'/bkapp': bokeh_app}, io_loop=io_loop, host=args.host, port=args.port,
                       extra_patterns=[('/', IndexHandler),
                                       (r'/help', helpHandler),
                                       (r'/upload', uploadPageHandler),
