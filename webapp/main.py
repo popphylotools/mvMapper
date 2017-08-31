@@ -211,6 +211,6 @@ def main():
 
 try:
     exit(main())
-except Exception:
-    logging.exception("Exception in main(): {}")
+except Exception as e:
+    log.exception("Exception in main(): {}".format(e))
     exit(1)
