@@ -8,6 +8,8 @@ Try a hosted instance of mvMapper **[Here](http://ctahr-peps.colo.hawaii.edu/)!*
 
 Back to the mvMapper [project page](https://popphylotools.github.io/mvMapper/)
 
+A stable version at the time of publishing is available here(link to zenodo url)
+
 Table of contents
 =================
 
@@ -22,7 +24,7 @@ Table of contents
 Hosted Example
 ==============
 
-A hosted instance of **mvMapper** is available [Here](http://ctahr-peps.colo.hawaii.edu/). See the corresponding [help](http://ctahr-peps.colo.hawaii.edu/help) page for usage instructions. **Note**, the web app loads slowly on some internet connections. If all you see is a grey screen and the navigation bar, give it a moment!
+A hosted instance of **mvMapper** is available [Here](http://ctahr-peps.colo.hawaii.edu/). See the corresponding [help](http://ctahr-peps.colo.hawaii.edu/help) page for usage instructions. **Note**, the web app loads slowly on some internet connections. If all you see is a grey screen and the navigation bar, give it a moment! The web app is also designed to be viewed on a wide-screen monitor, so zooming in/out might be required for optimal viewing experience.
 
 Input Files
 ===========
@@ -35,6 +37,8 @@ These files can be selected by adding their file names as optional parameters to
 ```
 <base_url>/?c=<config_filename>&d=<data_filename>
 ```
+
+mvMapper uses the default spatial reference system of [OpenStreetMap](https://www.openstreetmap.org), which is WGS84. Therefore, distortion may occur at high latitudes (see (Snyder 1987)[https://pubs.er.usgs.gov/publication/pp1395] for more information).
 
 Data
 -----
