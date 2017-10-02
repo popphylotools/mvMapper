@@ -24,7 +24,7 @@ Table of contents
 Hosted Example
 ==============
 
-A hosted instance of **mvMapper** is available [Here](http://ctahr-peps.colo.hawaii.edu/). See the corresponding [help](http://ctahr-peps.colo.hawaii.edu/help) page for usage instructions. **Note**, the web app loads slowly on some internet connections. If all you see is a grey screen and the navigation bar, give it a moment! The web app is also designed to be viewed on a wide-screen monitor, so zooming in/out might be required for optimal viewing experience.
+A hosted instance of **mvMapper** is available [Here](http://ctahr-peps.colo.hawaii.edu/). See the corresponding [help](http://ctahr-peps.colo.hawaii.edu/help) page for usage instructions. **Note**, the web app loads slowly on some internet connections. If all you see is a grey screen and the navigation bar, give it a moment! The web app is also designed to be viewed on a high resolution monitor, so zooming in/out using the browser might be required for optimal viewing experience.
 
 Input Files
 ===========
