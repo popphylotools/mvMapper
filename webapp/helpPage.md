@@ -3,7 +3,7 @@ mvMapper
 
 **mvMapper** (Multivariate Mapper) is an interactive data exploration tool for multivariate analyses with associated geographic location information. Although we developed mvMapper with population genetic data in mind, it will ingest results of virtually any multivariate analysis of georeferenced data. mvMapper’s greatest strength is facilitating dynamic exploration of the statistical and geographic frameworks side-by-side, a task that is difficult and time-consuming to do in static space. It displays a scatterplot with selectors for x-axis, y-axis, point color, point size, and color pallet in addition to a world map with optional jitter to separate overlapping points. Data selections are linked across the two plots, and a data table below shows details of the selected data, which can also be downloaded as a csv.
 
-The input format is a simple comma-delimited tabular file (.CSV) that can either be assembled manually, or generated using mvMapper’s input generation function in the adegenet library (export_to_webapp). This function currently supports multivariate analyses conducted in adegenet and those based on the duality diagram (dudi. functions) in ade4, including principal components analysis (regular and spatial varieties), discriminant analysis of principal components, principal coordinates analysis, non-metric dimensional scaling, and correspondence analysis.
+The input format is a simple comma-delimited tabular file (.CSV) that can either be assembled manually, or generated using mvMapper’s input generation function in the adegenet library (export_to_mvmapper). This function currently supports multivariate analyses conducted in adegenet and those based on the duality diagram (dudi. functions) in ade4, including principal components analysis (regular and spatial varieties), discriminant analysis of principal components, principal coordinates analysis, non-metric dimensional scaling, and correspondence analysis.
 
 Below, we provide an example of a general workflow (data preparation), and usage instructions for the web interface of mvMapper.  All example files can be found on our GitHub page under the [dataPrepExampleFiles](https://github.com/popphylotools/mvMapper/tree/master/dataPrepExampleFiles) directory.
 
@@ -13,9 +13,9 @@ General Workflow: Data Prep
 Here we show an example pipeline using **mvMapper** with **DAPC** in **adegenet**.
 For more details on the DAPC, see its [tutorial](https://github.com/thibautjombart/adegenet/raw/master/tutorials/tutorial-dapc.pdf).
 
-#### **Note**: `export_to_webapp` is currently available in the devel version of adegenet. For install instructions click [here](https://github.com/thibautjombart/adegenet/wiki/Installing-adegenet-devel)
+#### **Note**: `export_to_mvmapper` is currently available in the devel version of adegenet. For install instructions click [here](https://github.com/thibautjombart/adegenet/wiki/Installing-adegenet-devel)
 
-The `export_to_webapp` function in adegenet combines data from commonly-used multivariate analyses with
+The `export_to_mvmapper` function in adegenet combines data from commonly-used multivariate analyses with
 location information and supplementary data. The resulting data structure can be easily output as a CSV which is taken as input to our web app. At a minimum, the input to mvMapper must include three columns: `key` (individual identifiers),
 and `lat` and `lon` (containing the decimal coordinates associated with each sample). Additional columns are optional:
 
@@ -30,7 +30,7 @@ and `lat` and `lon` (containing the decimal coordinates associated with each sam
 Note that `easting` and `northing` are reserved column names used internally, so they should be avoided in the input data file.
 
 In the following example, we conduct DAPC and create an R object called `dapc1`.
-We then read in locality information from `localities.csv`, and combine the two using the `export_to_webapp` function before writing `rosenbergData.csv`, which is the input file for mvMapper.
+We then read in locality information from `localities.csv`, and combine the two using the `export_to_mvmapper` function before writing `rosenbergData.csv`, which is the input file for mvMapper.
 This localities file can include additional columns of information that will be ingested and displayed within the web app (e.g. host, sex, morphological characteristics).
 The resulting CSV file can be uploaded through the web app's upload interface, or configured as the default data file when running a custom mvMapper server (see install instructions on our [GitHub](https://github.com/popphylotools/mvMapper)).
 
@@ -46,9 +46,8 @@ dapc1 <- dapc(Rosenberg, n.pca=20, n.da=200)
 # read in localities.csv, which contains “key”, “lat”, and “lon” columns with column headers (this example contains a fourth column “population” which is a text-based population name based on geography)
 localities <- read.csv(file=”localities.csv”, header=T)
 
-# generate mvmapper input file and write to “rosenbergData.csv”
-out <- export_to_webapp(dapc1,localities)
-write.csv(out, “rosenbergData.csv”, row.names=F)
+# generate mvmapper input file, automatically write the output to a csv, and name the output csv "rosenbergData.csv" 
+out <- export_to_mvmapper(dapc1, localities, write_file=TRUE, out_file="rosenbergData.csv")
 ```
 
 Data Upload
