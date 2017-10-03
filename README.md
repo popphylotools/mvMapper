@@ -8,7 +8,9 @@ Try a hosted instance of mvMapper **[Here](http://ctahr-peps.colo.hawaii.edu/)!*
 
 Back to the mvMapper [project page](https://popphylotools.github.io/mvMapper/)
 
-A stable version at the time of publishing is available here(LINK TO ZENODO DOI)
+A stable version at the time of publishing is available here: [![DOI](https://zenodo.org/badge/77297502.svg)](https://zenodo.org/badge/latestdoi/77297502)
+
+
 
 Table of contents
 =================
