@@ -8,6 +8,8 @@ Try a hosted instance of mvMapper **[Here](http://ctahr-peps.colo.hawaii.edu/)!*
 
 Back to the mvMapper [project page](https://popphylotools.github.io/mvMapper/)
 
+The paper describing mvMapper is accepted in [Molecular Ecology Resources](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12724/abstract)
+
 A stable version at the time of publishing is available here: [![DOI](https://zenodo.org/badge/77297502.svg)](https://zenodo.org/badge/latestdoi/77297502)
 
 
