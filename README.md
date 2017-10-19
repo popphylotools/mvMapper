@@ -14,3 +14,5 @@ A hosted instance of **mvMapper** is available [Here](http://ctahr-peps.colo.haw
 ### Stand-alone Use
 
 **mvMapper** is also deployable from source code or a Docker container. Details can be found [Here](https://github.com/popphylotools/mvMapper)
+
+The paper describing mvMapper is accepted in [Molecular Ecology Resources](http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12724/abstract)
