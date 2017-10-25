@@ -158,29 +158,28 @@ class POSTHandler(tornado.web.RequestHandler):
                         response_to_send["success"] = False
                         response_to_send["error"] = "Failed to parse uploaded data."
                         log.error(str(e))
-                    else:
+                    else:  # if correctly parsed, continue with additional tests
                         columns = set(df.columns)
+                        max_lon = df['lon'].max()
+                        min_lon = df['lon'].min()
+                        max_lat = df['lat'].max()
+                        min_lat = df['lat'].min()
                         # check if has needed columns
                         if not {"key", "lat", "lon"}.issubset(columns):
                             response_to_send["success"] = False
                             response_to_send["error"] = 'Ensure that "key", "lat", and "lon" columns exist.'
-                        else:
-                            # check if lat/lon in range
-                            max_lon = df['lon'].max()
-                            min_lon = df['lon'].min()
-                            max_lat = df['lat'].max()
-                            min_lat = df['lat'].min()
-                            if not ((-180 <= max_lon <= 180)
-                               and  (-180 <= min_lon <= 180)
-                               and  (-90  <= max_lat <= 90)
-                               and  (-90  <= min_lat <= 90)):
-                                response_to_send["success"] = False
-                                response_to_send["error"] = ('Ensure that "lat" in range -90 to 90, '
+                        # check if lat/lon in range
+                        elif not (     (-180 <= max_lon <= 180)
+                                  and  (-180 <= min_lon <= 180)
+                                  and  (-90  <= max_lat <= 90)
+                                  and  (-90  <= min_lat <= 90)):
+                            response_to_send["success"] = False
+                            response_to_send["error"] = ('Ensure that "lat" in range -90 to 90, '
                                                              'and "lon" in range -180 to 180.')
-                            else:
-                                # passed all tests
-                                df.to_csv("data/" + new_filename, header=True, index=False)
-                                response_to_send["success"] = True
+                        # passed all tests
+                        else:
+                            df.to_csv("data/" + new_filename, header=True, index=False)
+                            response_to_send["success"] = True
 
         log.info(json.dumps(response_to_send))
         self.write(json.dumps(response_to_send))
