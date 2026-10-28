@@ -1,11 +1,11 @@
 mvMapper
 ========
 
-Try a hosted instance of mvMapper **[Here](http://ctahr-peps.colo.hawaii.edu/)!**
+Try a hosted instance of mvMapper **[here](http://ctahr-peps.colo.hawaii.edu/)**.
 ---------------------------------------------------------------------------------
 ![mvMapper](ScreenShot.png)
 
-**mvMapper** (Multivariate Mapper) is an interactive data exploration tool for multivariate analyses with associated geographic location information. Although we developed mvMapper with population genetic data in mind, it will ingest results of virtually any multivariate analysis of georeferenced data. mvMapper’s greatest strength is facilitating dynamic exploration of the statistical and geographic frameworks side-by-side, a task that is difficult and time-consuming to do in static space. It displays a scatterplot with selectors for x-axis, y-axis, point color, point size, and color pallet in addition to a world map with optional jitter to separate overlapping points. Data selections are linked across the two plots, and a data table below shows details of the selected data, which can also be downloaded as a csv.
+**mvMapper** (Multivariate Mapper) is an interactive data exploration tool for multivariate analyses with associated geographic location information. Although we developed mvMapper with population genetic data in mind, it will ingest results of virtually any multivariate analysis of georeferenced data. mvMapper’s greatest strength is facilitating dynamic exploration of the statistical and geographic frameworks side-by-side, a task that is difficult and time-consuming to do in static space. It displays a scatterplot with selectors for x-axis, y-axis, point color, point size, and color palette in addition to a world map with optional jitter to separate overlapping points. Data selections are linked across the two plots, and a data table below shows details of the selected data, which can also be downloaded as a csv.
 
 Back to the mvMapper [project page](https://popphylotools.github.io/mvMapper/)
 
@@ -29,7 +29,7 @@ Table of contents
 Hosted Example
 ==============
 
-A hosted instance of **mvMapper** is available [Here](http://ctahr-peps.colo.hawaii.edu/). See the corresponding [help](http://ctahr-peps.colo.hawaii.edu/help) page for usage instructions. **Note**, the web app loads slowly on some internet connections. If all you see is a grey screen and the navigation bar, give it a moment! The web app is also designed to be viewed on a high resolution monitor, so zooming in/out using the browser might be required for optimal viewing experience.
+A hosted instance of **mvMapper** is available [here](http://ctahr-peps.colo.hawaii.edu/). See the corresponding [help](http://ctahr-peps.colo.hawaii.edu/help) page for usage instructions. **Note**, the web app loads slowly on some internet connections. If all you see is a grey screen and the navigation bar, give it a moment! The web app is also designed to be viewed on a high resolution monitor, so zooming in/out using the browser might be required for optimal viewing experience.
 
 Input Files
 ===========
@@ -43,7 +43,7 @@ These files can be selected by adding their file names as optional parameters to
 <base_url>/?c=<config_filename>&d=<data_filename>
 ```
 
-mvMapper uses the default spatial reference system of [OpenStreetMap](https://www.openstreetmap.org), which is WGS84. Therefore, distortion may occur at high latitudes (see (Snyder 1987)[https://pubs.er.usgs.gov/publication/pp1395] for more information).
+mvMapper uses the default spatial reference system of [OpenStreetMap](https://www.openstreetmap.org), which is WGS84. Therefore, distortion may occur at high latitudes (see [Snyder 1987](https://pubs.er.usgs.gov/publication/pp1395) for more information).
 
 Data
 -----
@@ -65,7 +65,7 @@ All available options are documented as comments, please follow it as an example
 Run Using Docker
 ================
 
-If you have an os that supports [Docker](https://www.docker.com/), it can provide a straightforward install process. Note that on some systems, Docker has to run as root.
+If you have an OS that supports [Docker](https://www.docker.com/), it can provide a straightforward install process. Note that on some systems, Docker has to run as root.
 
 On systems which run docker in a virtual machine (such as older windows systems), mvMapper will need to be served using the instructions for remote access found below.
 
