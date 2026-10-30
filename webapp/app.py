@@ -11,12 +11,18 @@ import tornado
 import tornado.escape
 import yaml
 from bokeh.layouts import row, widgetbox, layout
-from bokeh.models import Select, CustomJS, Jitter, DataTable, TableColumn, Slider, Button
+from bokeh.models import Select, CustomJS, Jitter, DataTable, TableColumn, Slider, Button, WMTSTileSource
 # noinspection PyUnresolvedReferences
 from bokeh.palettes import linear_palette
 from bokeh.plotting import figure, ColumnDataSource
 from bokeh.themes import Theme
-from bokeh.tile_providers import STAMEN_TERRAIN
+
+# Stamen's free tile servers (tile.stamen.com) were shut down in 2023, so the
+# bundled STAMEN_TERRAIN basemap no longer loads. Esri World Topo is a free,
+# keyless terrain-style basemap in the same Web Mercator tiling.
+BASEMAP = WMTSTileSource(
+    url='https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{Z}/{Y}/{X}',
+    attribution='Tiles &copy; Esri, HERE, Garmin, FAO, NOAA, USGS, &copy; OpenStreetMap contributors, and the GIS User Community')
 
 log = logging.getLogger(__name__)
 
@@ -164,7 +170,7 @@ def modify_doc(doc):
 
     def create_map(_source):
         """Return map linked to ColumnDataSource '_source'."""
-        stamen = copy.copy(STAMEN_TERRAIN)
+        basemap = copy.copy(BASEMAP)
         # create map
         bound = 20000000  # meters
         m = figure(plot_height=700, plot_width=700,  # responsive=True,
@@ -172,7 +178,7 @@ def modify_doc(doc):
                    active_drag="box_select", active_scroll="wheel_zoom",
                    x_range=(-bound, bound), y_range=(-bound, bound))
         m.axis.visible = False
-        m.add_tile(stamen)
+        m.add_tile(basemap)
 
         # plot data on world map
         m.circle(x="es", y="ns", color="color", size="size", source=_source, line_color="white",
