@@ -1,4 +1,5 @@
-FROM continuumio/miniconda3
+# Pinned: newer miniconda images no longer resolve the 2017 package pins in environment.yml
+FROM continuumio/miniconda3:4.3.14
 MAINTAINER forest.bremer@gmail.com
 
 # Set the ENTRYPOINT to use bash
